@@ -5,7 +5,7 @@ import json
 import xml.etree.ElementTree as ET
 
 ROOT=Path(__file__).resolve().parents[1]
-BASIC="Cơ bản đã kiểm thử (Linux)"
+BASIC="Cơ bản đã kiểm thử"
 PART="Một phần / cần đánh giá thêm"
 WAIT="Bộ nối có mã, chưa nghiệm thu"
 NO="Chưa triển khai"
@@ -45,7 +45,7 @@ row(26,"Comping",PART,"M1/M3","test_gui_comping_and_copy_paste","Vùng take đư
 row(27,"Biến đổi giọng",PART,"M2/M4","test_harmony_adds_requested_interval; test_formant_changes_envelope_preserves_fundamental","Tạo bè quãng cố định và formant envelope thử nghiệm tạo biến đổi đo được.","Chưa giữ tự nhiên hoặc chọn bè theo hợp âm; chưa model biến đổi giọng.")
 row(28,"EQ",PART,"M2","test_eq_mid_adjustment","Ba dải với shelf thấp/cao và parametric mid; gain/mid frequency/Q hoạt động.","Chưa đồ thị tương tác kéo các dải EQ trực tiếp.")
 row(29,"Compressor",BASIC,"M2","test_compressor_reduces_dynamic_range","Threshold/ratio/attack/release/makeup; giảm chênh lệch mức theo test.","Chưa gain-reduction meter realtime, knee hay lookahead tùy chỉnh.")
-row(30,"Gate / Expander",PART,"M2","test_gate_quiet_floor","Noise gate giảm nền nhỏ dưới ngưỡng, có attack/release.","Expander mềm độc lập với ratio/knee còn thiếu.")
+row(30,"Gate / Expander",BASIC,"M2","test_gate_quiet_floor; test_expander_reduces_quiet_floor_with_soft_release; test_expander_attack_opens_and_release_closes_without_stereo_shift","Gate giảm nền; expander liên kết kênh có ratio, sàn dB, attack mở nhanh và release đóng chậm. Alpha.2 bổ sung kiểm tra cùng hành vi trong binary.","Bằng chứng mới cục bộ; Windows alpha.2 chờ chạy. Chưa có knee, sidechain detector riêng hoặc đánh giá nghe thật.")
 row(31,"Reverb / delay / chorus / saturation",BASIC,"M2","test_effects_audibly_alter_signal (4 cases)","Bốn hiệu ứng tạo thay đổi đo được; wet/drive/feedback/rate có tham số.","Đuôi hiệu ứng bị giới hạn bởi độ dài clip; cần nghe A/B thật.")
 row(32,"Pan và stereo width",BASIC,"M1/M2","test_pan_width_mono_and_phase; test_solo_mute_pan_gain_automation","Balance trái/phải và mid/side width được kiểm tra bằng dữ liệu.","Chưa tùy chọn pan law hoặc surround.")
 row(33,"Automation",PART,"M2/M3","test_solo_mute_pan_gain_automation; test_track_count_guard_and_automation_order","Điểm gain/pan nội suy theo thời gian, lưu trong project và ảnh hưởng render.","Chưa automation tham số hiệu ứng hoặc ghi đường cong realtime.")
@@ -62,7 +62,7 @@ row(43,"Gợi ý xử lý",PART,"M3","test_gui_desktop preview; source issue_cli
 row(44,"Preset theo mục đích",PART,"M2/M4","DSP chain tests; preset persistence implementation","Vocal tự nhiên, bản thu cũ, bass, lời nói; lưu preset JSON. Karaoke dùng stem sẵn có.","Karaoke AI chưa chạy; preset riêng chưa có ca GUI lưu/mở riêng.")
 row(45,"Cường độ xử lý",BASIC,"M2","test_desktop_import_edit_preview_save_reopen_export; DSP parameter tests","Wet/dry tổng trong preview/apply và tham số mức xử lý từng effect.","Đổi thời lượng cần 100%; thanh tổng không tác động rack/batch; nghe đánh giá nhẹ/mạnh còn thiếu.")
 row(46,"Lịch sử, tự lưu và phục hồi",BASIC,"M1/M5","test_recovery_after_process_abrupt_exit; test_failed_autosave_rolls_back_model; atomic-save tests","Kill process exit 7 rồi recovery giữ vị trí; undo sau recovery; lỗi save giữ bản cũ và rollback model.","Chưa crash khi Windows đang ghi đĩa thật, lost power hoặc cache cleanup; giới hạn 100 snapshots.")
-row(47,"Plugin bên ngoài",WAIT,"M4/M5","test_scan_vst_bundles_and_fault_isolation; test_ai_missing_and_plugin_invalid_file","VST3 discovery, worker process, timeout/cancel, tham số/state và render có mã; lỗi binary không làm hỏng model.","Chưa VST3 hợp lệ thực, state recall thành công, plugin native crash trên Windows, latency compensation/GUI editor.")
+row(47,"Plugin bên ngoài",PART,"M4/M5","test_scan_vst_bundles_and_fault_isolation; test_ai_missing_and_plugin_invalid_file; self-test VST3 CHOWTapeModel","Quét/nạp plugin thật, kết xuất thay đổi audio, lưu/mở dự án và phục hồi state kèm tham số đạt trên Linux; workflow alpha.2 chạy cùng fixture trên binary Windows.","Chưa nhiều vendor, native crash fixture, GUI editor hoặc latency compensation. Raw state riêng của fixture không giữ gain; tham số công khai được lưu/nạp kèm.")
 
 assert [r["id"] for r in rows]==list(range(1,48))
 docs=ROOT/"docs"
@@ -71,7 +71,7 @@ docs=ROOT/"docs"
 counts=collections.Counter(r["status"] for r in rows)
 intro="""# Ma trận đối chiếu 47 yêu cầu — Infinity audio 0.1
 
-**Chưa nghiệm thu sản phẩm đầy đủ.** “Cơ bản đã kiểm thử (Linux)” chỉ xác nhận hành vi được mô tả và test trong cột bằng chứng; không đồng nghĩa đạt chất lượng chuyên nghiệp hoặc chạy trên Windows. Cột thiếu là điều kiện tiếp tục, không bị bỏ khỏi phạm vi.
+**Chưa nghiệm thu sản phẩm đầy đủ.** “Cơ bản đã kiểm thử” chỉ xác nhận hành vi được mô tả và test trong cột bằng chứng; không đồng nghĩa đạt chất lượng chuyên nghiệp hoặc chạy trên mọi bản Windows. Alpha.1 có 96 tests và cài/chạy/gỡ đạt trên Windows Server 2022 CI (run 34842761393); các thay đổi alpha.2 phải có kết quả Windows riêng. Cột thiếu là điều kiện tiếp tục, không bị bỏ khỏi phạm vi.
 
 """
 intro+="; ".join(f"**{n}** {s}" for s,n in counts.items())+".\n\n"
@@ -80,10 +80,19 @@ for r in rows:
     matrix+=f"| {r['id']} | {r['name']} | {r['status']} · {r['phase']} | {r['test']} | {r['result']} | {r['missing']} |\n"
 (docs/"FEATURE_MATRIX_VI.md").write_text(intro+matrix,encoding="utf-8")
 
-results=json.loads((ROOT/"evidence/validation-results.json").read_text(encoding="utf-8"))
+validation_path=ROOT/"evidence/alpha2-validation-results.json"
+if not validation_path.exists():
+    validation_path=ROOT/"evidence/validation-results.json"
+results=json.loads(validation_path.read_text(encoding="utf-8"))
 freeze_path=ROOT/"evidence/linux-freeze-smoke.txt"
 freeze_evidence=freeze_path.read_text(encoding="utf-8").strip() if freeze_path.exists() else "Chưa có bằng chứng binary đóng băng Linux."
-xml=ET.parse(ROOT/"evidence/pytest-results.xml").getroot()
+# Prefer the latest pinned/dependency validation evidence when it exists.  The
+# legacy filename is kept as a fallback so the report script remains usable on
+# a checkout made before the alpha.2 test run.
+pytest_path=ROOT/"evidence/linux-alpha2-pytest.xml"
+if not pytest_path.exists():
+    pytest_path=ROOT/"evidence/pytest-results.xml"
+xml=ET.parse(pytest_path).getroot()
 suites=list(xml.iter("testsuite"))
 tests=sum(int(s.get("tests",0)) for s in suites);failed=sum(int(s.get("failures",0))+int(s.get("errors",0)) for s in suites);skipped=sum(int(s.get("skipped",0)) for s in suites)
 seconds=sum(float(s.get("time",0)) for s in suites)
@@ -91,13 +100,13 @@ all_names={case.get("name") for case in xml.iter("testcase")}
 gui_names=[case for case in xml.iter("testcase") if "test_gui" in case.get("classname","")]
 report=f"""# Infinity audio — báo cáo kiểm thử và bàn giao kỹ thuật
 
-Ngày lập: 2026-09-14. Phiên bản: **0.1.0-alpha.1**. Tên phần mềm: **Infinity audio**.
+Ngày lập: 2026-09-14. Phiên bản mã đang chuẩn bị: **0.1.0-alpha.2**. Tên phần mềm: **Infinity audio**.
 
 ## Kết luận nghiệm thu
 
-**Chưa hoàn thành sản phẩm đủ 47 tính năng; chưa có bộ cài `.exe` đã được build/kiểm chứng.** Đã phát triển một ứng dụng Qt desktop có các luồng biên tập/DSP thật và mã đóng gói Windows. Không có file `.exe` giả, không dùng trang web thay cho ứng dụng desktop và không coi bộ nối AI chưa chạy là tách stem hoàn tất.
+**Chưa hoàn thành sản phẩm đủ 47 tính năng.** Alpha.1 đã có installer `.exe` build từ Actions, cài/chạy/gỡ và self-test đạt trên Windows Server 2022 CI (run `34842761393`). Alpha.2 sửa VST3 state/parameter handling và chờ Actions build lại. Không coi bộ nối AI chưa chạy là tách stem hoàn tất.
 
-Lượt pytest cuối: **{tests-failed-skipped}/{tests} ca đạt, {failed} lỗi, {skipped} bỏ qua**, thời gian **{seconds:.2f} giây**; gồm **{len(gui_names)} ca tích hợp Qt offscreen**. Bằng chứng ở `evidence/pytest-results.xml`. Đây là tests phạm vi cụ thể trên Linux, không phải nghiệm thu đầy đủ 47 chức năng chuyên nghiệp.
+Lượt pytest cuối: **{tests-failed-skipped}/{tests} ca đạt, {failed} lỗi, {skipped} bỏ qua**; gồm **{len(gui_names)} ca tích hợp Qt offscreen/lifecycle**. Windows CI alpha.1 run `34842761393` ghi 96/96 ca đạt; alpha.2 còn chờ build lại.
 
 ## Môi trường thực tế
 
@@ -109,8 +118,8 @@ Lượt pytest cuối: **{tests-failed-skipped}/{tests} ca đạt, {failed} lỗ
 | CPU model / RAM tổng / GPU | Không được môi trường công bố; không tự suy đoán |
 | Peak RSS trong script đo tải | {results['peak_process_rss_kib']/1024:.1f} MiB (toàn script, chưa cô lập từng ca) |
 | Thiết bị phát | Không có PortAudio; không nghe qua thiết bị vật lý |
-| Windows / Wine / máy ảo | Không có trong môi trường; Windows tests không chạy |
-| AI / VST3 thực | Không có runtime/model được phê duyệt hoặc plugin hợp lệ làm fixture |
+| Windows / máy ảo | Windows Server 2022 hosted runner đã build/cài/chạy/gỡ; Windows 10/11 consumer chưa chạy |
+| AI / VST3 thực | Không có runtime/model AI; CHOWTapeModel fixture pinned được kiểm tra riêng, alpha.2 chờ Windows run |
 
 Dependencies thực: {', '.join(k+' '+v for k,v in results['packages'].items())}. Có venv dùng một số dependency từ runtime được cài sẵn. Chưa đo trên cấu hình tối thiểu/khuyến nghị Windows; các cấu hình đó trong kiến trúc là mục tiêu thiết kế.
 
@@ -162,24 +171,24 @@ report+="""
 | DSP-001 | De-ess split high-pass causal bị lệch pha; trừ khỏi dry không giảm dải 8 kHz đủ mức | Chuyển split offline sang zero-phase sosfiltfilt; chạy lại test giảm 8 kHz/giữ 440 Hz. Xem `deess-regression.xml` và pytest cuối |
 | UI-001 | Nền mixer trắng trong theme tối | Đặt nền widget theo theme; chụp lại cửa sổ Qt thật |
 | UI-002 | Biểu tượng full-width plus hiện ô thiếu glyph | Dùng ký tự plus tương thích; ảnh chụp lại |
+| DSP-002 | Expander dùng ngược attack/release, dễ làm mất đầu tiếng | Attack mở, release đóng; kiểm tra transient DC, liên kết stereo, ratio=1 và đuôi im lặng |
+| VST-001 | Giá trị tham số Pedalboard không truyền được qua pipe | Chuyển scalar theo kiểu tham số; VST3 thật quét/nạp/render và khôi phục dự án được kiểm tra |
+| VST-002 | Hộp tham số sửa trực tiếp object trong dự án trước render | Sao chép thiết lập và bỏ cấu hình khi chọn plugin khác; thêm GUI tests và self-test trong binary |
 
 Không có lỗi mất dữ liệu được phát hiện trong tập ca đã chạy. Không tuyên bố không còn P0/P1 trên Windows hoặc phần AI/plugin chưa thử. Cổng phát hành vẫn đóng.
 
 ## Giấy phép và đóng gói
 
-Mã nguồn chuẩn bị GPL-3.0-only, đi cùng toàn văn GPL và notice thu từ dependency. Inventory 33 package Linux ghi rõ những Qt/Shiboken wheels thiếu notice trong metadata; vẫn cần audit binary Windows, source obligation GPL và quyền từng model/plugin. Trọng số Demucs không được gộp và không tự tải. Chưa ký số.
+Mã nguồn GPL-3.0-only, đi cùng toàn văn GPL và notice thu từ dependency. Script thu inventory theo dependency thực tế, bổ sung LICENSE.txt của CPython trên Windows và dừng build nếu thiếu notice CPython. Việc thu notice không thay thế audit nguồn tương ứng và quyền phân phối. Trọng số Demucs không được gộp và không tự tải. Chưa ký số.
 
-Có PyInstaller spec, NSIS script, PowerShell build/test installer và GitHub Actions workflow. Chưa chạy chúng trên Windows; chưa có SHA256 bộ cài Windows. Không cài hoặc đăng bài lên dịch vụ ngoài nào trong phiên này.
+PyInstaller, NSIS và quy trình cài/chạy/gỡ đã đạt trên Windows Server 2022 CI ở alpha.1, run `34842761393`, commit `bc75e6abc987f16ffeb9a04ca4498d6cda379c33`. Installer SHA-256: `641a1ab42d71b886f87e060dca051a537533d849a21f71dbb16c9aec61317107`. Đây là bằng chứng alpha.1; alpha.2 chứa sửa VST3 và Expander cần Windows run riêng. `clean_machine_confirmed` và `audio_hardware_verified` vẫn false.
 
-Binary onedir Linux được tạo trong môi trường này và smoke-test `--smoke-test` thoát mã 0; đây là bằng chứng đóng băng Linux, **không phải bộ cài Windows**. Nhật ký/hash: `evidence/linux-freeze-smoke.txt`.
-```
-{freeze_evidence}
-```
+Nhật ký binary Linux của mốc trước nằm ở `evidence/linux-freeze-smoke.txt`; không coi đó là bằng chứng alpha.2 hoặc Windows.
 
 ## Phần việc cần hoàn tất
 
 1. Build và sửa mọi lỗi phát sinh trên Windows x64; nghiệm thu cài/khởi chạy/gỡ trên máy sạch không có môi trường lập trình, rồi nghe thiết bị thật.
-2. Hoàn thiện các hạng mục thiếu trong ma trận: AI/stem/bleed, chất lượng phục hồi, note editor/warp/alignment, comping nâng cao, EQ trực quan, expander, FX automation, true peak và plugin thực.
+2. Hoàn thiện các hạng mục thiếu trong ma trận: AI/stem/bleed, chất lượng phục hồi, note editor/warp/alignment, comping nâng cao, EQ trực quan, FX automation, true peak và tương thích nhiều plugin thực.
 3. Có corpus âm thanh đại diện được cấp quyền và test mù trước/sau; đo chất lượng lẫn hiệu năng trên cấu hình mục tiêu.
 4. Hoàn tất notice/source/model/codec audit, pin dependency Windows, chữ ký, kiểm tra DPI và phát hành khi không còn P0/P1 đã biết và đủ 47 yêu cầu có bằng chứng.
 

@@ -3,20 +3,20 @@ Unicode True
 !include "x64.nsh"
 !include "WinVer.nsh"
 !define APP_NAME "Infinity audio"
-!define APP_VERSION "0.1.0-alpha.1"
+!define APP_VERSION "0.1.0-alpha.2"
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\InfinityAudio"
 Name "${APP_NAME} ${APP_VERSION}"
-OutFile "..\dist\Infinity-audio-0.1.0-alpha.1-win64-setup.exe"
+OutFile "..\dist\Infinity-audio-0.1.0-alpha.2-win64-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\InfinityAudio"
 InstallDirRegKey HKCU "Software\InfinityAudio" "InstallDir"
 RequestExecutionLevel user
 SetCompressor zlib
 ShowInstDetails show
 ShowUninstDetails show
-VIProductVersion "0.1.0.0"
+VIProductVersion "0.1.0.2"
 VIAddVersionKey "ProductName" "Infinity audio"
 VIAddVersionKey "FileDescription" "Infinity audio alpha installer — chưa nghiệm thu đầy đủ"
-VIAddVersionKey "FileVersion" "0.1.0.0"
+VIAddVersionKey "FileVersion" "0.1.0.2"
 VIAddVersionKey "LegalCopyright" "Infinity audio contributors — GPL-3.0-only"
 !define MUI_ICON "..\assets\infinity.ico"
 !define MUI_UNICON "..\assets\infinity.ico"

@@ -1,20 +1,22 @@
 # Infinity audio
 
-Ứng dụng chỉnh sửa âm thanh desktop bằng tiếng Việt. **Bản 0.1.0-alpha.1 là bản kỹ thuật có mã chạy và kiểm thử, chưa phải sản phẩm hoàn tất 47 yêu cầu. Chưa có bộ cài Windows `.exe` đã được build/kiểm chứng.**
+Ứng dụng chỉnh sửa âm thanh desktop bằng tiếng Việt. **Bản 0.1.0-alpha.2 tiếp tục phát triển từ bộ cài alpha.1 đã build, cài, chạy và gỡ thành công trên Windows Server 2022 CI. Chưa nghiệm thu đầy đủ 47 yêu cầu hoặc Windows 10/11 sạch.**
 
 ![Giao diện tối của ứng dụng Qt thật](evidence/Infinity-audio-dark.png)
 
 ## Có gì trong gói này?
 
 - Mã nguồn Qt desktop, DSP thực, timeline nhiều track, mixer, preview A/B, lịch sử và dự án portable `.infinity`.
-- Các phép phục hồi cơ bản, pitch/tempo, sửa cao độ đơn âm thử nghiệm, formant thử nghiệm, EQ, compressor/gate, FX, LUFS, xuất WAV/FLAC/MP3.
+- Các phép phục hồi cơ bản, pitch/tempo, sửa cao độ đơn âm thử nghiệm, formant thử nghiệm, EQ, compressor/gate/expander, FX, LUFS, xuất WAV/FLAC/MP3.
 - Bộ nối VST3 tách tiến trình và Demucs local thử nghiệm; xem trạng thái chưa nghiệm thu trong ma trận.
 - Tests tự động, mẫu âm thanh tổng hợp trước/sau, dự án demo, ảnh chụp giao diện thật.
 - PyInstaller spec, script NSIS tạo bộ cài `.exe`, workflow Windows CI và checklist Windows sạch.
 
-Trạng thái kiểm chứng hiện tại: **93/93 test đạt trên Linux**, cùng 5 mẫu DSP trước/sau,
-6 mức bitrate MP3 và các bài tải 32 track, 10 phút và 20 file hàng loạt. Chi tiết nằm trong
-`docs/TEST_REPORT_VI.md`; `evidence/linux-freeze-smoke.txt` chỉ là smoke-test binary Linux.
+Trạng thái kiểm chứng: **101/101 test đạt cục bộ trên Linux**; mốc alpha.1 trên Windows CI đạt
+96/96, 5 mẫu DSP trước/sau, 6 mức bitrate MP3 và các bài tải 32 track, 10 phút, 20 file.
+Alpha.2 sửa truyền tham số VST3, bổ sung Expander mềm và thêm fixture plugin thật vào
+kiểm thử binary đã cài; Windows CI alpha.2 cần hoàn tất trước khi dùng installer mới.
+Xem `docs/TEST_REPORT_VI.md` và artifacts của workflow tương ứng để đối chiếu chính xác phiên bản/hash.
 
 ## Chạy từ mã nguồn (dành cho người build)
 
@@ -65,4 +67,6 @@ Repo dành riêng cho dự án: https://github.com/musiclife2292-blip/infinity
 
 Workflow chạy tests, tạo mẫu DSP, đóng gói PyInstaller + NSIS, rồi dùng một runner Windows khác để cài/chạy/gỡ bản alpha. Diagnostic `InfinityAudio.exe --self-test report.json` kiểm tra giao diện, xử lý, codec, dự án và khôi phục ngay trong binary đã đóng gói. Playback của diagnostic dùng buffer bộ nhớ; thiết bị âm thanh thật chưa được chứng minh bởi CI. Chỉ job cài đặt thành công mới tạo artifact `Infinity-audio-win64-alpha`.
 
-Mã ứng dụng trong gói được chuẩn bị theo **GPL-3.0-only** để phù hợp Pedalboard/JUCE. Chưa có trọng số AI, plugin bên thứ ba hoặc binary Windows trong gói. Xem thông báo bản quyền và cổng pháp lý trước khi phân phối.
+Mã ứng dụng theo **GPL-3.0-only** để phù hợp Pedalboard/JUCE. Bộ cài chứa runtime cơ bản;
+chưa có trọng số AI hoặc plugin bên thứ ba. Plugin CHOWTapeModel chỉ được tải trong CI
+để kiểm tra host, không đưa vào installer. Xem thông báo bản quyền và giới hạn trước khi phân phối rộng rãi.

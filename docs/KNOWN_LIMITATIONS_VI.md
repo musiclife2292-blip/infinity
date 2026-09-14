@@ -4,13 +4,13 @@
 
 ## Các việc chặn nghiệm thu
 
-1. Chưa có `.exe` Windows được build; chưa cài/khởi chạy/gỡ trên Windows sạch; chưa thử loa/tai nghe/driver thật.
+1. Alpha.1 đã build `.exe`, cài/khởi chạy/gỡ trên Windows Server 2022 CI (run 34842761393). Chưa kiểm thử Windows 10/11 sạch hoặc loa/tai nghe/driver thật. Mỗi bản sau phải có artifact và báo cáo khớp hash riêng.
 2. Chưa có inference tách stem thực tế hoặc mẫu stem trước/sau; model/runtime chưa đóng gói, quyền trọng số chưa được giải quyết. Bộ giảm bleed chưa triển khai.
 3. Phục hồi giọng/de-reverb còn DSP cơ bản thử nghiệm; chưa nghe đánh giá với bản thu người thật. Sửa pitch mới đơn âm/chromatic và chọn vùng thủ công; chưa có piano roll từng nốt, scale snapping thông minh, formant-preserving retune.
 4. Căn nhịp chỉ dời đầu clip; căn vocal chỉ một độ trễ toàn clip. Chưa warp/DTW theo câu. Comping là ghép vùng thủ công, chưa take lanes với lựa chọn loại trừ.
-5. EQ mới ba dải qua số, chưa đồ thị kéo điểm trực tiếp. Gate có xử lý, expander độc lập còn thiếu. Automation mới gain/pan, chưa tham số FX.
+5. EQ mới ba dải qua số, chưa đồ thị kéo điểm trực tiếp. Gate và Expander có bộ xử lý; Expander alpha.2 cần xác minh Windows. Automation mới gain/pan, chưa tham số FX.
 6. LUFS có phép đo thực nhưng UI chỉ đo tối đa 60 giây đầu buffer. True peak 4× là ước lượng, limiter chưa kiểm soát true peak đạt chuẩn; chưa có chứng nhận meter/limiter. Chưa dither xuất PCM16/24.
-7. VST3 có code quét/nạp/state/render/cách ly tiến trình và đã thử lỗi đầu vào; chưa thử một plugin hợp lệ thực tế hoặc crash native. Chưa editor plugin gốc/MIDI/instrument/latency compensation. State recall thành công chưa có bằng chứng.
+7. Alpha.2 đã sửa lỗi scalar wrapper không truyền được qua pipe. CHOWTapeModel thật đạt quét/nạp/kết xuất/lưu dự án/phục hồi bằng state kèm tham số trên Linux; CI Windows bổ sung cùng phép thử trên app đã cài. Chưa thử nhiều vendor hoặc crash native có chủ ý; chưa editor plugin gốc/MIDI/instrument/latency compensation. Raw state riêng của fixture không giữ gain, nên dự án lưu và nạp lại cả tham số công khai.
 8. Audit notice và nguồn tương ứng GPL/Qt/DLL/codec trên Windows chưa hoàn tất; chưa chứng thư ký số. Bộ cài alpha không được coi là release đã kiểm duyệt.
 
 ## Giới hạn vận hành hiện có
@@ -28,4 +28,4 @@
 - Tìm vấn đề và BPM/key/chords là heuristic; có thể nhầm nhạc cụ với nhiễu, false positive clipping hoặc hợp âm. Không chẩn đoán chất lượng giọng tự động.
 - Giao diện spectral còn thang tần số tuyến tính; chưa log-frequency axis/brush/interpolation spectral repair. Chọn clip khác cần tạo ảnh phổ cho clip đó.
 
-Không có bằng chứng “đạt chất lượng chuyên nghiệp” trên giọng thật, môi trường Windows, AI hoặc VST3 thật. Không có lỗi data-loss được phát hiện trong tập tests đã chạy; điều đó không đảm bảo không có lỗi ở phần chưa kiểm thử.
+Chưa có bằng chứng đạt chất lượng chuyên nghiệp trên giọng thật, AI hoặc nhiều plugin/vendor. Windows CI và một VST3 fixture chỉ xác minh các hành vi đã ghi trong báo cáo. Không có lỗi data-loss được phát hiện trong tập tests đã chạy; điều đó không đảm bảo không có lỗi ở phần chưa kiểm thử.

@@ -1,19 +1,21 @@
 # Infinity audio — trạng thái bàn giao alpha
 
-Phiên bản mã: **0.1.0-alpha.1**. Tên sản phẩm: **Infinity audio**.
+Phiên bản mã: **0.1.0-alpha.2**. Tên sản phẩm: **Infinity audio**.
 
 ## Đã có trong mã nguồn
 
 - Ứng dụng desktop Qt tiếng Việt, timeline waveform/spectrogram, mixer, project `.infinity`, undo/redo, autosave/recovery, preview A/B và các chuỗi DSP đã nối vào giao diện.
-- Bộ test tự động 93 ca, bằng chứng trước/sau DSP, kiểm tra codec và tải lớn.
+- Bộ test tự động 101 ca, bằng chứng trước/sau DSP, kiểm tra codec và tải lớn; thêm kiểm thử vòng đời Qt, Expander và VST3 thật.
 - Tài liệu kiến trúc, hướng dẫn sử dụng, ma trận 47 yêu cầu, giới hạn, thông báo bên thứ ba và checklist nghiệm thu Windows sạch.
 - PyInstaller spec, NSIS installer script, PowerShell build/test và GitHub Actions workflow để tạo bộ cài Windows x64.
 
 ## Cổng phát hành còn mở
 
-- Môi trường hiện tại là Linux; không có Windows, Wine, NSIS hoặc thiết bị PortAudio. Vì vậy **chưa có `.exe` Windows** và chưa thể xác nhận cài/chạy/gỡ trên máy Windows sạch.
+- Alpha.1 đã có bộ cài `.exe` từ GitHub Actions run `34842761393`; build job và install job đều đạt trên Windows Server 2022 CI, bao gồm cài/chạy/gỡ và self-test 23 mục. Alpha.2 đang chờ build lại sau các sửa đổi VST3; Windows 10/11 sạch và thiết bị PortAudio thật vẫn chưa xác nhận.
 - AI Demucs, chất lượng tách stem, giảm bleed giữa stem và plugin VST3 cần runtime/model/plugin được cấp quyền để chạy nghiệm thu.
 - Ma trận `docs/FEATURE_MATRIX_VI.md` ghi trạng thái từng tính năng, ca kiểm thử, kết quả đo và phần còn thiếu; không đánh dấu các bộ nối chưa chạy là đã hoàn tất.
+
+Artifact alpha.1 có SHA-256 installer: `641a1ab42d71b886f87e060dca051a537533d849a21f71dbb16c9aec61317107`. Chỉ dùng như bản thử nghiệm; bản alpha.2 sẽ có hash và báo cáo riêng sau khi Actions hoàn tất.
 
 ## Lệnh tái tạo trên máy build
 
@@ -29,7 +31,7 @@ Windows x64 dùng PowerShell:
 
 ```powershell
 .\scripts\build_windows.ps1
-    .\scripts\test_windows_install.ps1 -Installer .\dist\Infinity-audio-0.1.0-alpha.1-win64-setup.exe
+    .\scripts\test_windows_install.ps1 -Installer .\dist\Infinity-audio-0.1.0-alpha.2-win64-setup.exe
 ```
 
 Sau khi hai script Windows và checklist máy sạch đạt, cần lưu SHA-256 bộ cài và cập nhật báo cáo trước khi gọi là bản phát hành.

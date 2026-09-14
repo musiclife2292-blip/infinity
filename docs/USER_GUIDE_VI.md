@@ -1,6 +1,6 @@
 # Hướng dẫn sử dụng Infinity audio 0.1
 
-Đây là hướng dẫn cho bản alpha đã có mã desktop. Bộ cài Windows chưa được kiểm chứng. Các nút chạy xử lý cơ bản có bộ xử lý thật; phần AI báo trạng thái chưa khả dụng khi thiếu runtime/model.
+Đây là hướng dẫn cho bản alpha đã có mã desktop. Alpha.1 đã qua cài/chạy/gỡ trên Windows Server 2022 CI; alpha.2 cần kết quả Windows riêng. Các nút chạy xử lý cơ bản có bộ xử lý thật; phần AI báo trạng thái chưa khả dụng khi thiếu runtime/model.
 
 ## Làm quen
 
@@ -47,7 +47,7 @@ Chọn **Spectrogram** để tạo ảnh phổ của clip đã chọn. Trục d�
 
 Tắt = mute. Riêng = solo; nếu có track solo, chỉ các track solo không bị mute được nghe. Gain dùng dB. Pan -1 trái, 0 giữa, +1 phải; đây là balance stereo, không phải pan law tùy chọn. Width 0 mono, 1 gốc, 2 tăng side. Mono có thể gây triệt tiêu âm lệch pha; xem tương quan pha.
 
-**+ Rack** thêm hiệu ứng vào chuỗi track; dùng mũi tên đổi thứ tự và Xóa FX. Hiệu ứng thay đổi thời lượng phải áp dụng lên clip. Rack được kết xuất khi phát/xuất; chưa có bypass realtime riêng từng FX hoặc editor sửa lại FX tại chỗ, hãy xóa/thêm cấu hình mới.
+**+ Rack** thêm hiệu ứng vào chuỗi track; dùng mũi tên đổi thứ tự và Xóa FX. Hiệu ứng thay đổi thời lượng phải áp dụng lên clip. Rack được kết xuất khi phát/xuất; Gate dùng tỷ lệ lớn; Expander giảm mềm dưới ngưỡng với ratio và floor. Attack là thời gian mở khi có âm lớn; release là thời gian đóng khi âm giảm. Chưa có bypass realtime riêng từng FX hoặc editor sửa lại FX tại chỗ, hãy xóa/thêm cấu hình mới.
 
 **Automation** hiện hỗ trợ điểm gain dB và pan theo giây từ đầu dự án. Giá trị điểm được nội suy tuyến tính; ngoài khoảng điểm giữ giá trị gần nhất. Automation thay thế giá trị tĩnh của tham số đó. Lưu một đường tại mỗi lần mở hộp thoại. Chưa hỗ trợ tham số hiệu ứng.
 

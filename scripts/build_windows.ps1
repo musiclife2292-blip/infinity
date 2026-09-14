@@ -54,7 +54,7 @@ if (-not $Makensis) {
 if (-not $Makensis -or -not (Test-Path $Makensis)) { throw "Cài NSIS 3.x (makensis.exe) trước bước tạo bộ cài." }
 Push-Location packaging
 try { & $Makensis installer.nsi; Assert-Exit "NSIS" } finally { Pop-Location }
-Get-FileHash dist\Infinity-audio-0.1.0-alpha.1-win64-setup.exe -Algorithm SHA256 | Format-List
-(Get-FileHash dist\Infinity-audio-0.1.0-alpha.1-win64-setup.exe -Algorithm SHA256).Hash.ToLower() + "  Infinity-audio-0.1.0-alpha.1-win64-setup.exe" |
-    Set-Content dist\Infinity-audio-0.1.0-alpha.1-win64-setup.exe.sha256 -Encoding ascii
+Get-FileHash dist\Infinity-audio-0.1.0-alpha.2-win64-setup.exe -Algorithm SHA256 | Format-List
+(Get-FileHash dist\Infinity-audio-0.1.0-alpha.2-win64-setup.exe -Algorithm SHA256).Hash.ToLower() + "  Infinity-audio-0.1.0-alpha.2-win64-setup.exe" |
+    Set-Content dist\Infinity-audio-0.1.0-alpha.2-win64-setup.exe.sha256 -Encoding ascii
 Write-Host "Đã BUILD bản alpha. Chưa được xem là release đã nghiệm thu. Chạy scripts/test_windows_install.ps1 và checklist Windows sạch."

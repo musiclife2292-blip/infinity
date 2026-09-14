@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+.venv-alpha2/
+dependency-restore.log
 build/
 dist/
 *.egg-info/
@@ -10,6 +12,7 @@ dist/
 workspaces/
 pytest-of-root/
 third_party_licenses/
+test-fixtures/
 evidence/windows*/
 evidence/windows-*.xml
 evidence/windows-*.json

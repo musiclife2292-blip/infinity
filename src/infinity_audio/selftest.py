@@ -6,6 +6,7 @@ the playback route without claiming that CI has listened through a device.
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import platform
 import sys
@@ -128,6 +129,12 @@ def run(app, report_path):
             check("frozen_librosa_pitch", shifted.shape == audio.shape and abs(peak_hz - 880) < 5, peak_hz=float(peak_hz))
             meter = dsp.meters(mixed, sr)
             check("frozen_loudness", bool(meter) and all(np.isfinite(v) for v in meter.values() if isinstance(v, (float, int))), values=meter)
+            steps=np.concatenate([np.full(sr,.001),np.full(sr,.2),np.full(sr,.001)])[:,None].astype(np.float32)
+            expanded=dsp.apply_effect(steps,sr,{"kind":"expander","params":{
+                "threshold_db":-35,"ratio":4,"floor_db":-36,"attack_ms":2,"release_ms":500}})
+            check("expander_attack_release", float(expanded[0,0]/steps[0,0])<.02 and
+                  float(expanded[round(1.02*sr),0]/steps[round(1.02*sr),0])>.98 and
+                  float(expanded[round(2.1*sr),0]/steps[round(2.1*sr),0])>.75)
             malformed = base / "broken.vst3"
             malformed.write_text("invalid plugin", encoding="utf-8")
             rejected = False
@@ -136,6 +143,59 @@ def run(app, report_path):
             except AudioError:
                 rejected = True
             check("plugin_failure_isolation", rejected)
+            fixture = os.environ.get("INFINITY_TEST_VST3")
+            if fixture:
+                # CI supplies an explicitly selected, pinned CHOWTapeModel
+                # fixture. It is never installed with the application.
+                fixture = Path(fixture).resolve()
+                discovered = {Path(value).resolve() for value in plugins.discover(fixture.parent)}
+                check("vst3_discovery", fixture in discovered,
+                      discovered_plugins=[str(value) for value in sorted(discovered)])
+                info = plugins.run_plugin(fixture, timeout=45)
+                check("vst3_load", "output_gain" in info["parameters"] and bool(info["state"]))
+                params = {k: False for k in info["parameters"] if k.endswith("on_off")}
+                params["output_gain"] = -9.0
+                plugin_input = np.repeat(audio, 2, axis=1)
+                in_path, out_path = base / "plugin-input.npy", base / "plugin-output.npy"
+                np.save(in_path, plugin_input, allow_pickle=False)
+                info = plugins.run_plugin(fixture, params=params, input_path=in_path,
+                                          output_path=out_path, sr=sr, timeout=60)
+                effected = np.load(out_path, allow_pickle=False)
+                check("vst3_render", effected.shape == plugin_input.shape and
+                      np.isfinite(effected).all() and float(np.std(effected)) > .001 and
+                      float(np.std(effected - plugin_input)) > .01)
+                plugin_session = Session(base / "plugin-session", sr)
+                _, plugin_cid = plugin_session.add_track(effected, "VST3 fixture")
+                plugin_session.commit("Lưu trạng thái VST3", lambda state:
+                    plugin_session.find_clip(plugin_cid, state)[1].update(plugin_state=info))
+                plugin_project = base / "Plugin.infinity"
+                plugin_session.save(plugin_project)
+                recalled = Session.load(plugin_project, base / "plugin-reopened")
+                state = recalled.find_clip(plugin_cid)[1]["plugin_state"]
+                check("vst3_project_state", state == info)
+                from .dialogs import PluginDialog
+                saved_params=dict(state["parameters"])
+                dialog=PluginDialog(previous=state)
+                edited_params=dict(saved_params,output_gain=-12.0)
+                dialog.params.setPlainText(json.dumps(edited_params))
+                dialog.apply()
+                check("vst3_dialog_preserves_project", state["parameters"]==saved_params and
+                      dialog.info["parameters"]["output_gain"]==-12.0)
+                dialog.close()
+                recall_path = base / "plugin-recalled.npy"
+                recalled_info = plugins.run_plugin(fixture, params=state["parameters"], state=state["state"],
+                    input_path=in_path, output_path=recall_path, sr=sr, timeout=60)
+                recalled_audio = np.load(recall_path, allow_pickle=False)
+                # The plugin smooths a freshly changed gain at startup. Raw
+                # state restores parameters, not the transient delay buffers.
+                steady_error = float(np.max(np.abs(effected[sr:] - recalled_audio[sr:])))
+                check("vst3_state_and_parameters_recall", steady_error < 1e-5 and
+                      abs(recalled_info["parameters"]["output_gain"] + 9) < .01,
+                      steady_state_max_error=steady_error,
+                      recalled_gain=recalled_info["parameters"]["output_gain"])
+                result["vst3_fixture"] = {"path": str(fixture), "name": "CHOWTapeModel",
+                    "state_bytes_base64": len(info["state"]),
+                    "sha256": hashlib.sha256(fixture.read_bytes()).hexdigest() if fixture.is_file() else None}
             check("source_unchanged", original_hash == hashlib.sha256(source.read_bytes()).hexdigest())
             status = json.loads((Path(__file__).parent / "feature_status.json").read_text(encoding="utf-8"))
             check("bundled_feature_matrix", len(status) == 47)

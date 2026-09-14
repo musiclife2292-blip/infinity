@@ -44,10 +44,11 @@ def _child(connection,path,params,state,input_path,output_path,sr):
         info={"path":path,"parameters":{},"state":base64.b64encode(plugin.raw_state).decode("ascii")}
         for name,param in plugin.parameters.items():
             value=getattr(plugin,name)
-            if isinstance(value,(float,int,str,bool)):
-                info["parameters"][name]=value
-            else:
-                info["parameters"][name]=str(value)
+            # Pedalboard returns weak-reference wrapper subclasses. They
+            # resemble scalars but cannot be pickled across the worker pipe.
+            scalar_type=param.type
+            value=scalar_type(value) if scalar_type in (bool,int,float,str) else str(value)
+            info["parameters"][name]=value
         connection.send({"ok":True,"result":info})
     except BaseException as e:
         connection.send({"ok":False,"error":str(e)})

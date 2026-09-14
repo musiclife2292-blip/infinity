@@ -1,6 +1,6 @@
 # Build và đóng gói Windows
 
-**Trạng thái thực tế: môi trường thực hiện là Linux. Chưa chạy các script PowerShell/NSIS, chưa tạo hoặc chạy bộ cài `.exe`. Các script dưới đây là đầu vào build được bàn giao, không phải bằng chứng bộ cài đã hoạt động.**
+**Alpha.1 đã build bằng GitHub Actions và qua cài/chạy/gỡ trên Windows Server 2022 CI, run 34842761393. Alpha.2 bổ sung sửa lỗi và kiểm thử VST3 thật. Kiểm tra artifact và báo cáo của từng run trước khi sử dụng; Windows 10/11 sạch và thiết bị âm thanh vẫn chưa nghiệm thu.**
 
 ## Build bản cơ bản
 
@@ -20,7 +20,7 @@ Nếu cần chỉ rõ Python hoặc NSIS:
 Script tạo venv, cài dependency, chạy tests, kiểm kê license, tạo icon, PyInstaller onedir, chạy smoke test executable và NSIS. Kết quả **dự kiến khi build thành công**:
 
 - `dist/InfinityAudio/InfinityAudio.exe` cùng `_internal/`.
-- `dist/Infinity-audio-0.1.0-alpha.1-win64-setup.exe`.
+- `dist/Infinity-audio-0.1.0-alpha.2-win64-setup.exe`.
 
 Không chỉ sao chép `InfinityAudio.exe` trong onedir: cần toàn bộ `_internal`. Bộ cài NSIS đã cấu hình mang theo cả thư mục. Nó cài vào `%LOCALAPPDATA%\Programs\InfinityAudio`, tạo shortcut Start Menu, ghi Apps & Features cho user hiện tại và tạo uninstaller; không đòi admin. Chưa đăng ký liên kết mặc định `.infinity`. Cần kiểm tra máy Windows sạch để phát hiện thiếu Qt DLL, libsndfile, PortAudio, runtime MSVC hoặc lazy import librosa.
 
@@ -31,12 +31,12 @@ PyInstaller không là cross-compiler. Không đổi đuôi một file Linux th�
 ## Kiểm tra bộ cài
 
 ```powershell
-.\scripts\test_windows_install.ps1 -Installer .\dist\Infinity-audio-0.1.0-alpha.1-win64-setup.exe
+.\scripts\test_windows_install.ps1 -Installer .\dist\Infinity-audio-0.1.0-alpha.2-win64-setup.exe
 ```
 
 Script dùng thư mục thử riêng, từ chối nếu tài khoản đã có Infinity audio, chạy install silent, smoke-test, uninstall và ghi JSON cấu hình máy/kết quả. Cờ `clean_machine_confirmed` và `audio_hardware_verified` mặc định false: script không thể chứng minh những điều đó. Người thử cần hoàn thành checklist Windows sạch, dùng tài khoản không có Python/venv/NSIS trên máy đích, thử loa/tai nghe và các luồng thực.
 
-Workflow `.github/workflows/windows-build.yml` dùng `windows-2022`, tạo **artifact alpha**, không phát hành công khai. Chưa đẩy lên repository hoặc chạy GitHub Actions trong phiên này. Windows Server CI không thay thế Windows 10/11 consumer sạch, HiDPI, WASAPI/thiết bị âm thanh và việc nghe đánh giá.
+Workflow `.github/workflows/windows-build.yml` dùng `windows-2022`, tạo **artifact alpha** trên repo `musiclife2292-blip/infinity`. Máy build và máy thử cài tách riêng; máy thử loại developer tools khỏi PATH. Fixture CHOWTapeModel được tải từ commit cố định, kiểm tra SHA-256 và chỉ dùng kiểm thử VST3. Windows Server CI không thay thế Windows 10/11 consumer sạch, HiDPI, WASAPI/thiết bị âm thanh và việc nghe đánh giá.
 
 ## AI — phần phát triển chưa nghiệm thu
 

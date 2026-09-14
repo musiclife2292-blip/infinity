@@ -33,7 +33,8 @@ EFFECTS = {
  "harmonize": spec("Tạo bè / làm dày", "Một bè dịch cao độ; không tự chọn hợp âm hay điều khiển formant.", semitones=("Quãng bè (bán âm)",7,-12,12,.1), mix=("Mức bè (%)",30,0,100,1), delay_ms=("Trễ lớp bè (ms)",18,0,80,1)),
  "eq": spec("EQ ba dải", "Low/high shelf và một peak mid. Q quyết định độ rộng dải trung.", low_db=("Trầm (dB)",0,-18,18,.5), mid_db=("Trung (dB)",0,-18,18,.5), high_db=("Cao (dB)",0,-18,18,.5), mid_hz=("Tần số trung (Hz)",1200,100,10000,50), q=("Q trung",.7,.1,8,.1)),
  "compressor": spec("Compressor", "Nén chênh lệch âm lượng. Threshold là ngưỡng; ratio là tỷ lệ nén.", threshold_db=("Ngưỡng (dB)",-18,-60,0,1), ratio=("Tỷ lệ",3,1,20,.1), attack_ms=("Attack (ms)",10,.1,200,1), release_ms=("Release (ms)",120,5,1000,5), makeup_db=("Bù gain (dB)",0,0,18,.5)),
- "gate": spec("Gate", "Đóng âm dưới ngưỡng. Mốc này chưa có expander mềm riêng.", threshold_db=("Ngưỡng (dB)",-45,-80,0,1), attack_ms=("Attack (ms)",3,.1,100,.5), release_ms=("Release (ms)",100,5,1000,5)),
+ "gate": spec("Gate", "Đóng âm dưới ngưỡng bằng cổng cứng; dùng Expander nếu muốn giảm mềm.", threshold_db=("Ngưỡng (dB)",-45,-80,0,1), attack_ms=("Attack (ms)",3,.1,100,.5), release_ms=("Release (ms)",100,5,1000,5)),
+ "expander": spec("Expander", "Giảm mềm tín hiệu dưới ngưỡng; giữ transient và nền tự nhiên hơn gate cứng.", threshold_db=("Ngưỡng (dB)",-45,-80,0,1), ratio=("Tỷ lệ mở rộng",2,1,10,.1), attack_ms=("Attack (ms)",5,.1,200,1), release_ms=("Release (ms)",120,5,1000,5), floor_db=("Sàn giảm (dB)",-36,-80,0,1)),
  "reverb": spec("Reverb", "Tạo không gian bằng thuật toán reverb. Đuôi bị cắt ở cuối clip; thêm khoảng trống nếu cần.", room_size=("Kích thước phòng",.45,0,1,.01), damping=("Damping",.5,0,1,.01), mix=("Wet (%)",20,0,100,1)),
  "delay": spec("Delay", "Tiếng lặp có feedback; đuôi nằm trong độ dài vùng xử lý.", time_ms=("Thời gian (ms)",280,1,2000,10), feedback=("Feedback (%)",25,0,85,1), mix=("Wet (%)",20,0,100,1)),
  "chorus": spec("Chorus", "Điều biến trễ để làm dày âm thanh.", rate_hz=("Tốc độ (Hz)",1,.1,8,.1), depth=("Độ sâu",.25,0,1,.01), mix=("Wet (%)",25,0,100,1)),
@@ -227,6 +228,32 @@ def apply_effect(data, sr, effect, cancel=None):
         y = native(x, sr, [pb.Compressor(p["threshold_db"],p["ratio"],p["attack_ms"],p["release_ms"]), pb.Gain(p["makeup_db"])])
     elif kind == "gate":
         y = native(x, sr, [pb.NoiseGate(p["threshold_db"],10,p["attack_ms"],p["release_ms"])])
+    elif kind == "expander":
+        # A downward expander with a smoothed shared envelope.  The detector
+        # is intentionally channel-linked so a stereo vocal does not wander
+        # left/right when one side falls below the threshold.
+        power = np.mean(x.astype(np.float64) ** 2, axis=1)
+        window = max(1, int(sr * .008))
+        env = np.sqrt(np.maximum(0, ndimage.uniform_filter1d(power, window, mode="nearest")))
+        level_db = db(env)
+        reduction_db = np.minimum(0, (level_db - p["threshold_db"]) * (p["ratio"] - 1))
+        reduction_db = np.maximum(reduction_db, p["floor_db"])
+        target = amp(reduction_db)
+        smoothed = np.empty_like(target)
+        previous = float(target[0])
+        attack = max(1, int(sr * p["attack_ms"] / 1000))
+        release = max(1, int(sr * p["release_ms"] / 1000))
+        attack_coeff = math.exp(-1 / attack)
+        release_coeff = math.exp(-1 / release)
+        for i, value in enumerate(target):
+            if i % 16384 == 0:
+                check_cancel(cancel)
+            # Attack opens the expander when wanted audio rises; release
+            # closes it gradually after the signal drops below threshold.
+            coeff = attack_coeff if value > previous else release_coeff
+            previous = coeff * previous + (1 - coeff) * value
+            smoothed[i] = previous
+        y = x * smoothed[:, None]
     elif kind == "reverb":
         y = native(x, sr, [pb.Reverb(room_size=p["room_size"],damping=p["damping"],wet_level=p["mix"]/100,dry_level=1-p["mix"]/100)])
     elif kind == "delay":

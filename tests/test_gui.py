@@ -14,6 +14,33 @@ from infinity_audio import render
 pytestmark=pytest.mark.gui
 
 
+def test_plugin_dialog_edit_does_not_mutate_project(qapp):
+    from infinity_audio.dialogs import PluginDialog
+    previous={"path":"saved.vst3","parameters":{"gain":-3},"state":"c3RhdGU="}
+    snapshot=copy.deepcopy(previous)
+    dialog=PluginDialog(previous=previous)
+    dialog.params.setPlainText('{"gain": -12}')
+    dialog.apply()
+    assert previous==snapshot
+    assert dialog.info["parameters"]["gain"]==-12
+    dialog.close()
+
+
+def test_plugin_selection_invalidates_loaded_settings(qapp):
+    from infinity_audio.dialogs import PluginDialog
+    from PySide6.QtWidgets import QDialogButtonBox
+    previous={"path":"first.vst3","parameters":{"gain":-3},"state":"c3RhdGU="}
+    dialog=PluginDialog(previous=previous)
+    dialog.list.addItem("second.vst3")
+    dialog.list.setCurrentRow(1)
+    assert dialog.info is None
+    assert not dialog.box.button(QDialogButtonBox.StandardButton.Apply).isEnabled()
+    assert dialog.params.toPlainText()==""
+    dialog.apply()
+    assert previous["parameters"]["gain"]==-3
+    dialog.close()
+
+
 def settle(qapp,window,timeout=30):
     until=time.monotonic()+timeout
     while window.jobs.busy and time.monotonic()<until:

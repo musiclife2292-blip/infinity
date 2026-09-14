@@ -92,6 +92,33 @@ def test_gate_quiet_floor(sr):
     assert np.std(y[sr:])<np.std(x[sr:])*.1
 
 
+def test_expander_reduces_quiet_floor_with_soft_release(sr):
+    quiet=tone_at(400,sr,2*sr,.001)
+    loud=tone_at(400,sr,2*sr,.2)
+    x=np.concatenate([quiet,loud])
+    y=dsp.apply_effect(x,sr,{"kind":"expander","params":{"threshold_db":-35,"ratio":4,"floor_db":-36}})
+    assert np.std(y[int(.5*sr):int(1.5*sr)])<np.std(x[int(.5*sr):int(1.5*sr)])*.2
+    assert np.std(y[int(2.5*sr):int(3.5*sr)])>np.std(x[int(2.5*sr):int(3.5*sr)])*.8
+
+
+def test_expander_attack_opens_and_release_closes_without_stereo_shift(sr):
+    # Stepped DC isolates the gain envelope from a tone's zero crossings.
+    mono=np.concatenate([np.full(sr,.001),np.full(sr,.2),np.full(sr,.001)])
+    x=np.column_stack([mono,mono*.25]).astype(np.float32)
+    params={"threshold_db":-35,"ratio":4,"floor_db":-36,"attack_ms":2,"release_ms":500}
+    y=dsp.apply_effect(x,sr,{"kind":"expander","params":params})
+    gain=y[:,0]/x[:,0]
+    assert gain[0]==pytest.approx(dsp.amp(-36),rel=1e-5)
+    assert gain[round(1.02*sr)]>.98  # Attack must open within 20 ms.
+    assert gain[round(2.1*sr)]>.75   # Release must not chop the tail.
+    np.testing.assert_allclose(y[:,1],y[:,0]*.25,atol=1e-7)
+    unity=dsp.apply_effect(x,sr,{"kind":"expander","params":{"ratio":1}})
+    np.testing.assert_array_equal(unity,x)
+    ended=x.copy();ended[2*sr:]=0
+    result=dsp.apply_effect(ended,sr,{"kind":"expander","params":params})
+    assert np.isfinite(result).all() and not np.any(result[2*sr:])
+
+
 @pytest.mark.parametrize("kind",["reverb","delay","chorus","saturation"])
 def test_effects_audibly_alter_signal(kind,sr):
     x=tone_at(330,sr,2*sr,.2);x[sr:]=0

@@ -61,9 +61,18 @@ jobs:
           $expected = ((Get-Content dist/*setup.exe.sha256 -Raw).Trim() -split '\s+')[0]
           $actual = (Get-FileHash dist/*setup.exe -Algorithm SHA256).Hash
           if ($expected -ne $actual) { throw 'Installer checksum mismatch' }
+      - name: Download pinned VST3 fixture for host validation
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force test-fixtures | Out-Null
+          Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/spotify/pedalboard/d4e18fcf822e1602e014a24ddd670d8a9bf8a3f9/tests/plugins/effect/Windows/CHOWTapeModel.vst3' -OutFile test-fixtures/CHOWTapeModel.vst3
+          $hash = (Get-FileHash test-fixtures/CHOWTapeModel.vst3 -Algorithm SHA256).Hash
+          if ($hash -ne 'cb1eab8221cf3c7c8f53534ba1f2365ed3958aea66b0051e7039ea18f0d1d394') { throw 'VST3 fixture checksum mismatch' }
       - name: Install, exercise and uninstall on a separate runner
         shell: pwsh
-        run: ./scripts/test_windows_install.ps1 -Installer ./dist/Infinity-audio-0.1.0-alpha.1-win64-setup.exe -RuntimeOnly
+        env:
+          INFINITY_TEST_VST3: ${{ github.workspace }}\test-fixtures\CHOWTapeModel.vst3
+        run: ./scripts/test_windows_install.ps1 -Installer ./dist/Infinity-audio-0.1.0-alpha.2-win64-setup.exe -RuntimeOnly
       - name: Save installation evidence
         uses: actions/upload-artifact@v4
         if: always()

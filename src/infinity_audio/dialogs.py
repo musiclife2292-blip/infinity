@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 from PySide6.QtCore import Qt
@@ -131,13 +132,22 @@ class PluginDialog(QDialog):
             self.list.addItem(previous["path"])
             self.list.setCurrentRow(0)
             self.params.setPlainText(json.dumps(previous.get("parameters",{}),ensure_ascii=False,indent=2))
-            self.info=previous
+            self.info=copy.deepcopy(previous)
             self.status.setText("Thiết lập đã lưu. Nạp lại có chủ ý hoặc áp dụng để chạy VST3.")
+        self.list.currentItemChanged.connect(self.selection_changed)
         self.on_busy(False)
 
     def on_busy(self,busy):
         self.scan.setEnabled(not busy);self.inspect.setEnabled(not busy)
+        self.list.setEnabled(not busy);self.params.setReadOnly(busy)
         self.box.button(QDialogButtonBox.StandardButton.Apply).setEnabled(not busy and self.info is not None)
+
+    def selection_changed(self,current,previous):
+        if self.info is not None and (current is None or current.text()!=self.info["path"]):
+            self.info=None
+            self.params.clear()
+            self.status.setText("Hãy nạp plugin mới chọn trước khi áp dụng.")
+        self.on_busy(self.jobs.busy)
 
     def scan_folder(self):
         folder=QFileDialog.getExistingDirectory(self,"Chọn thư mục VST3")
@@ -172,10 +182,15 @@ class PluginDialog(QDialog):
         self.status.setText(message)
 
     def apply(self):
+        if self.jobs.busy or self.info is None:
+            return
         try:
             values=json.loads(self.params.toPlainText())
             if not isinstance(values,dict):
                 raise ValueError("Cần một object JSON.")
+            # Dialog edits must never mutate a clip's stored state before
+            # the render succeeds and MainWindow commits an undoable edit.
+            self.info=copy.deepcopy(self.info)
             self.info["parameters"]=values
             self.accept()
         except ValueError as e:
