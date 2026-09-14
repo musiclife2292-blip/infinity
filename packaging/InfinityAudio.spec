@@ -20,6 +20,10 @@ for name in ["pedalboard", "librosa", "pyloudnorm", "_soundfile_data", "_soundde
 for name in ["librosa", "soundfile", "sounddevice", "pedalboard", "pyloudnorm", "numpy", "scipy"]:
     datas += copy_metadata(name)
 
+# librosa loads scikit-learn lazily. Include its native utility explicitly
+# so pitch/tempo processing is available in the frozen application.
+hiddenimports += ["sklearn._cyutility"]
+
 a = Analysis([str(root / "launch.py")], pathex=[str(root / "src")], binaries=binaries,
              datas=datas, hiddenimports=hiddenimports,
              excludes=["torch", "demucs", "tkinter", "PyQt5", "PyQt6", "matplotlib", "IPython"],

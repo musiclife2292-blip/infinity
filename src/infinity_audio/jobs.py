@@ -1,12 +1,12 @@
 """Qt worker lifecycle; no UI work or model commit in background tasks."""
 import threading
 import traceback
-from PySide6.QtCore import QObject, QThread, Signal, Slot
+from PySide6.QtCore import QObject, QThread, QTimer, Qt, Signal, Slot
 from .errors import Cancelled
 
 
 class Worker(QObject):
-    result=Signal(object)
+    result=Signal(object,object)
     failed=Signal(str)
     progress=Signal(float,str)
     finished=Signal()
@@ -20,7 +20,7 @@ class Worker(QObject):
         try:
             result=self.function(self.token,self.progress.emit)
             if not self.token.is_set():
-                self.result.emit(result)
+                self.result.emit(result,self.token)
         except Cancelled:
             pass
         except Exception as e:
@@ -59,16 +59,18 @@ class JobRunner(QObject):
         self.worker.result.connect(self._deliver)
         self.worker.progress.connect(self.progress)
         self.worker.failed.connect(self.failed)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self._finished)
+        # quit() is thread-safe; a direct connection also allows shutdown()
+        # to join without needing the GUI event loop to dispatch quit first.
+        self.worker.finished.connect(self.thread.quit, Qt.ConnectionType.DirectConnection)
+        self.thread.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self._finished, Qt.ConnectionType.QueuedConnection)
         self.busyChanged.emit(True)
         self.thread.start()
         return True
 
-    @Slot(object)
-    def _deliver(self,result):
-        if self._success and not self.token.is_set():
+    @Slot(object,object)
+    def _deliver(self,result,token):
+        if token is self.token and self._success and not token.is_set():
             try:
                 self._success(result)
             except Exception as e:
@@ -76,7 +78,17 @@ class JobRunner(QObject):
 
     @Slot()
     def _finished(self):
-        old=self.thread
+        self._retire(self.sender())
+
+    def _retire(self,old):
+        # A queued notification from a joined job must not retire a newer job.
+        if old is None or old is not self.thread:
+            return
+        # finished can precede native thread-local cleanup. Do not release
+        # Python/Qt ownership until wait succeeds, and keep the UI responsive.
+        if not old.wait(0):
+            QTimer.singleShot(10, lambda: self._retire(old))
+            return
         self.thread=self.worker=None
         self._success=None
         old.deleteLater()
@@ -86,3 +98,14 @@ class JobRunner(QObject):
     def cancel(self):
         if self.token:
             self.token.set()
+
+    def shutdown(self, timeout_ms=10000):
+        """Cancel and join; callers must retain this object if it times out."""
+        self.cancel()
+        old=self.thread
+        if old is None:
+            return True
+        if not old.wait(timeout_ms):
+            return False
+        self._retire(old)
+        return True
