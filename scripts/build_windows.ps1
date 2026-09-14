@@ -3,6 +3,9 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
+foreach ($required in @("packaging/InfinityAudio.spec", "packaging/installer.nsi", "requirements-dev.txt", "launch.py", "LICENSE")) {
+    if (-not (Test-Path (Join-Path $root $required))) { throw "Source checkout thiếu file bắt buộc: $required" }
+}
 if (-not [Environment]::Is64BitOperatingSystem -or $env:OS -ne "Windows_NT") {
     throw "Build này cần máy Windows x64; không hỗ trợ cross-build từ Linux."
 }
