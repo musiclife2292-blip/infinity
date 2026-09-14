@@ -1,0 +1,425 @@
+[
+  {
+    "id": 1,
+    "name": "Lọc nhiễu",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M4",
+    "test": "test_noise_reduction_improves_snr_on_gated_harmonics; sample denoise",
+    "result": "Spectral gain có cường độ và nền còn lại; SNR tín hiệu tổng hợp cải thiện, xem bảng đo.",
+    "missing": "Chưa đánh giá giọng thật/nhiễu xe không dừng hoặc độ tự nhiên."
+  },
+  {
+    "id": 2,
+    "name": "Phục hồi giọng hát",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M4",
+    "test": "test_processors_return_audio_without_mutating_input[restore]",
+    "result": "Chuỗi khử nền, high-pass và EQ tạo audio thật, không sửa input.",
+    "missing": "Chưa phục hồi AI hoặc minh chứng giữ đặc trưng giọng trên bản thu hỏng."
+  },
+  {
+    "id": 3,
+    "name": "Bass boosted",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_bass_increases_low_relative_to_mid",
+    "result": "Tăng vùng bass so với 1.5 kHz >2 lần trong ca thử; output dưới ceiling -1 dBFS.",
+    "missing": "Nghe đánh giá trên loa/tai nghe và nhạc thật; true-peak limiter còn thiếu."
+  },
+  {
+    "id": 4,
+    "name": "De-clip",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M4",
+    "test": "test_declip_reduces_clipped_sine_mse; sample declip",
+    "result": "Nội suy cubic giảm lỗi trên sine bị clip ngắn; threshold và mức sửa có tham số.",
+    "missing": "Không phục hồi plateau dài, clipping nhiều tầng hoặc nội dung đã mất; chưa test giọng thật."
+  },
+  {
+    "id": 5,
+    "name": "De-click / De-crackle",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2",
+    "test": "test_declick_reduces_impulse_error; sample declick",
+    "result": "Median detector giảm MSE xung thêm vào tín hiệu; có độ nhạy/cửa sổ.",
+    "missing": "Chưa dataset đĩa than/crackle dày; có nguy cơ xóa transient."
+  },
+  {
+    "id": 6,
+    "name": "De-hum",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_dehum_attenuates_50_and_harmonics_preserves_voice",
+    "result": "50/100 Hz bị giảm theo ngưỡng test, giữ tone 997 Hz; cơ bản/họa âm/Q chỉnh được.",
+    "missing": "Cần thử nhiễu điện trôi tần số và thiết bị Windows."
+  },
+  {
+    "id": 7,
+    "name": "De-reverb",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M4",
+    "test": "test_processors_return_audio_without_mutating_input[dereverb]",
+    "result": "Có ước lượng giảm đuôi phổ trả dữ liệu hữu hạn.",
+    "missing": "Chưa WPE/AI, phép đo độ rõ hoặc nghe A/B phòng thật; không coi là phục hồi chuyên nghiệp."
+  },
+  {
+    "id": 8,
+    "name": "De-ess và giảm bật hơi",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2",
+    "test": "test_deess_reduces_sibilant_band",
+    "result": "Đã sửa lỗi lệch pha split-band; test giảm tone 8 kHz và giữ 440 Hz đạt. High-pass cho bật hơi.",
+    "missing": "Chưa mẫu phụ âm s/x/p/b người thật; cần đánh giá mất phụ âm và màu giọng."
+  },
+  {
+    "id": 9,
+    "name": "Chỉnh sửa phổ âm",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_spectral_selected_frequency_and_time; test_gui_spectrogram_and_direct_spectral_selection",
+    "result": "Có ảnh STFT và chọn chữ nhật nối tham số. Tone 3 kHz vùng chọn giảm, 500 Hz và vùng ngoài được giữ.",
+    "missing": "Chưa brush, log axis, nội suy phục hồi phổ hoặc tách âm chồng tần số."
+  },
+  {
+    "id": 10,
+    "name": "Tách vocal và nhạc nền",
+    "status": "Bộ nối có mã, chưa nghiệm thu",
+    "phase": "M4",
+    "test": "test_ai_missing_and_plugin_invalid_file (chỉ lỗi/manifest)",
+    "result": "Có bộ nối Demucs local và UI báo thiếu runtime/model. Không có lần inference thành công.",
+    "missing": "Runtime, model có quyền sử dụng/phân phối, kết quả và before/after stem thực tế."
+  },
+  {
+    "id": 11,
+    "name": "Tách nhiều stem",
+    "status": "Bộ nối có mã, chưa nghiệm thu",
+    "phase": "M4",
+    "test": "test_ai_missing_and_plugin_invalid_file (chỉ manifest)",
+    "result": "Công bố 4 stem drums/bass/other/vocals; 6 stem thêm guitar/piano. Adapter kiểm tra nguồn model.",
+    "missing": "Chưa chạy model 4/6 stem, chưa quality benchmark/đóng gói."
+  },
+  {
+    "id": 12,
+    "name": "Quản lý stem",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1",
+    "test": "test_solo_mute_pan_gain_automation; test_gui_desktop flow",
+    "result": "Stem nhập sẵn là track có mute/solo/gain và xuất riêng qua renderer.",
+    "missing": "Quản lý kết quả AI chưa có inference để nghiệm thu; UI export stem chưa tự động test riêng."
+  },
+  {
+    "id": 13,
+    "name": "Giảm âm thanh lọt giữa stem",
+    "status": "Chưa triển khai",
+    "phase": "M4",
+    "test": "Chưa có test hoặc thuật toán",
+    "result": "Không có bộ giảm bleed chuyên biệt.",
+    "missing": "Thiết kế, triển khai thuật toán theo stem/reference, đo giảm bleed và mất nhạc cụ."
+  },
+  {
+    "id": 14,
+    "name": "Tạo bản phối rút gọn",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1/M4",
+    "test": "test_solo_mute_pan_gain_automation",
+    "result": "Mute/solo các track cho mix rút gọn; lệnh karaoke tắt vocal khi đã có stem.",
+    "missing": "Chưa tách stem từ mix đầu vào; cần nghe bài thật."
+  },
+  {
+    "id": 15,
+    "name": "Biên tập đoạn nhạc",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1",
+    "test": "test_edit_save_reopen_export_equivalent; test_gui_comping_and_copy_paste",
+    "result": "Chia/trim/copy/paste/duplicate/move/delete và gộp track tạo quyết định sửa thật.",
+    "missing": "Chưa nhiều clip selection/ripple mode; kéo GUI cần thử Windows/HiDPI."
+  },
+  {
+    "id": 16,
+    "name": "Chỉnh sửa nhiều track",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1",
+    "test": "test_32_track_deterministic_sum; stress 32×30s",
+    "result": "32 track render có sai số mẫu được đo; timeline, mixer và tài sản riêng.",
+    "missing": "Chưa engine streaming nhiều giờ/64 track nhạc thật."
+  },
+  {
+    "id": 17,
+    "name": "Fade và crossfade",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1/M2",
+    "test": "test_fade_split_and_trim_samples",
+    "result": "Fade tuyến tính vào/ra có ảnh hưởng đo được; crossfade chỉnh overlap + hai fade bổ sung.",
+    "missing": "Cần nghe điểm ghép trên nhạc tương quan khác nhau; chưa equal-power curve lựa chọn."
+  },
+  {
+    "id": 18,
+    "name": "Phát hiện khoảng lặng",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_silence_detection_and_shorten",
+    "result": "Tìm đoạn 1–2s trong fixture và rút ngắn về thời lượng mong đợi; GUI đặt marker hoặc áp dụng.",
+    "missing": "Chưa đánh giá threshold tối ưu trên giọng nhỏ/nhạc ambience."
+  },
+  {
+    "id": 19,
+    "name": "Loop, marker và cấu trúc bài",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1",
+    "test": "test_transport_eof_loop_and_mono; test_marker_structure_survives_roundtrip",
+    "result": "Buffer lặp chính xác; marker Intro/Verse/Chorus lưu/mở lại đúng.",
+    "missing": "Chưa nghe loop qua driver thật hoặc giao diện quản lý marker nâng cao."
+  },
+  {
+    "id": 20,
+    "name": "Chỉnh sửa không phá hủy",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1",
+    "test": "test_undo_redo_branch_and_assets_immutable; test_edit_save_reopen_export_equivalent",
+    "result": "Asset SHA bất biến; undo/redo, branch history và project roundtrip giữ số mẫu/state.",
+    "missing": "Giới hạn 100 snapshot; cần Windows filesystem/crash tests."
+  },
+  {
+    "id": 21,
+    "name": "Sửa cao độ",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M3/M4",
+    "test": "test_monophonic_correction_reduces_detuning",
+    "result": "YIN + correction chromatic giảm lệch tone 452 Hz về gần 440 Hz; chỉnh tay qua vùng + bán âm.",
+    "missing": "Piano roll từng nốt, thang âm, retune/formant mượt và giọng thật chưa đạt."
+  },
+  {
+    "id": 22,
+    "name": "Đổi tông giữ tốc độ",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_pitch_shift_preserves_duration",
+    "result": "Dịch +12 bán âm: tone 440→gần 880 Hz, giữ số mẫu.",
+    "missing": "Nghe artefact/transient/formant trên nhạc thật."
+  },
+  {
+    "id": 23,
+    "name": "Đổi tốc độ giữ cao độ",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_tempo_preserves_pitch",
+    "result": "Rate 1.25 tạo số mẫu đúng và peak gần 440 Hz.",
+    "missing": "Chưa warp tempo map biến thiên hoặc chất lượng cực trị."
+  },
+  {
+    "id": 24,
+    "name": "Căn nhịp",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M3",
+    "test": "Session.move và lệnh quantize đầu clip",
+    "result": "Snap đầu clip theo BPM có mã nối UI/model.",
+    "missing": "Chưa transient detection + warp marker cho các phách trong clip; chưa ca nghiệm thu riêng snap UI."
+  },
+  {
+    "id": 25,
+    "name": "Căn các lớp vocal",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M3/M4",
+    "test": "test_alignment_known_delay",
+    "result": "Cross-correlation envelope tìm độ trễ 250 ms trong fixture; UI dịch clip theo tham chiếu.",
+    "missing": "Chưa căn từng âm tiết/câu hoặc DTW trên take khác nhau."
+  },
+  {
+    "id": 26,
+    "name": "Comping",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M1/M3",
+    "test": "test_gui_comping_and_copy_paste",
+    "result": "Vùng take được chép đúng offset/length vào track Comp vocal.",
+    "missing": "Chưa take lanes, lựa chọn loại trừ hoặc tự mute tất cả take nguồn; cần nghe điểm nối."
+  },
+  {
+    "id": 27,
+    "name": "Biến đổi giọng",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M4",
+    "test": "test_harmony_adds_requested_interval; test_formant_changes_envelope_preserves_fundamental",
+    "result": "Tạo bè quãng cố định và formant envelope thử nghiệm tạo biến đổi đo được.",
+    "missing": "Chưa giữ tự nhiên hoặc chọn bè theo hợp âm; chưa model biến đổi giọng."
+  },
+  {
+    "id": 28,
+    "name": "EQ",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2",
+    "test": "test_eq_mid_adjustment",
+    "result": "Ba dải với shelf thấp/cao và parametric mid; gain/mid frequency/Q hoạt động.",
+    "missing": "Chưa đồ thị tương tác kéo các dải EQ trực tiếp."
+  },
+  {
+    "id": 29,
+    "name": "Compressor",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_compressor_reduces_dynamic_range",
+    "result": "Threshold/ratio/attack/release/makeup; giảm chênh lệch mức theo test.",
+    "missing": "Chưa gain-reduction meter realtime, knee hay lookahead tùy chỉnh."
+  },
+  {
+    "id": 30,
+    "name": "Gate / Expander",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2",
+    "test": "test_gate_quiet_floor",
+    "result": "Noise gate giảm nền nhỏ dưới ngưỡng, có attack/release.",
+    "missing": "Expander mềm độc lập với ratio/knee còn thiếu."
+  },
+  {
+    "id": 31,
+    "name": "Reverb / delay / chorus / saturation",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_effects_audibly_alter_signal (4 cases)",
+    "result": "Bốn hiệu ứng tạo thay đổi đo được; wet/drive/feedback/rate có tham số.",
+    "missing": "Đuôi hiệu ứng bị giới hạn bởi độ dài clip; cần nghe A/B thật."
+  },
+  {
+    "id": 32,
+    "name": "Pan và stereo width",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1/M2",
+    "test": "test_pan_width_mono_and_phase; test_solo_mute_pan_gain_automation",
+    "result": "Balance trái/phải và mid/side width được kiểm tra bằng dữ liệu.",
+    "missing": "Chưa tùy chọn pan law hoặc surround."
+  },
+  {
+    "id": 33,
+    "name": "Automation",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M3",
+    "test": "test_solo_mute_pan_gain_automation; test_track_count_guard_and_automation_order",
+    "result": "Điểm gain/pan nội suy theo thời gian, lưu trong project và ảnh hưởng render.",
+    "missing": "Chưa automation tham số hiệu ứng hoặc ghi đường cong realtime."
+  },
+  {
+    "id": 34,
+    "name": "Sidechain / Ducking",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_ducking_follows_reference",
+    "result": "Mức nhạc giảm ở vùng có reference, vùng không có giữ nguyên; UI chọn source/depth.",
+    "missing": "Detector pre-FX, threshold cố định ở UI; chưa MIDI/sidechain plugin routing."
+  },
+  {
+    "id": 35,
+    "name": "Limiter và cân bằng độ lớn",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2",
+    "test": "test_limiter_ceiling_and_normalize; test_loudness_normalization_and_channel_sum",
+    "result": "Sample ceiling, RMS và integrated LUFS normalization có đo kiểm.",
+    "missing": "Chưa true-peak limiter được xác nhận; headroom có thể ngăn đạt LUFS mục tiêu."
+  },
+  {
+    "id": 36,
+    "name": "Đo mức âm thanh",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M5",
+    "test": "test_loudness_normalization_and_channel_sum; meters on sample fixtures",
+    "result": "LUFS/RMS/sample peak/clipping count và TP ước lượng 4×.",
+    "missing": "UI đo tối đa 60s; chưa realtime meter hoặc bộ chuẩn BS.1770/true-peak reference đầy đủ."
+  },
+  {
+    "id": 37,
+    "name": "Kiểm tra pha và mono",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_pan_width_mono_and_phase; test_transport_eof_loop_and_mono",
+    "result": "Phản pha tương quan gần -1, mono triệt tiêu fixture đúng; có checkbox mono.",
+    "missing": "Chưa nghe thực qua driver Windows."
+  },
+  {
+    "id": 38,
+    "name": "BPM, tông và hợp âm",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M3",
+    "test": "test_bpm_key_chords_on_synthetic_c_major",
+    "result": "Fixture C major/120 BPM qua nhận diện cơ bản; hộp cho sửa BPM/key/chords.",
+    "missing": "Chưa benchmark bài thật, hợp âm đảo/tông tương đối; kết quả heuristic cần sửa."
+  },
+  {
+    "id": 39,
+    "name": "So sánh trước–sau",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M1/M2",
+    "test": "test_rms_ab_matching; test_desktop_import_edit_preview_save_reopen_export",
+    "result": "Preview tạo cặp A/B không commit, bù RMS; test route phát qua buffer giả lập.",
+    "missing": "Chưa nghe thiết bị thật; chuyển A/B khởi động lại đầu vùng, không seamless."
+  },
+  {
+    "id": 40,
+    "name": "Xuất nhiều định dạng",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1/M2",
+    "test": "test_audio_roundtrip (6 variants); codec ffprobe evidence",
+    "result": "WAV16/24/float32, FLAC16/24, MP3; rate/channels; 6 CBR bitrate khớp ffprobe.",
+    "missing": "Cần kiểm lại Windows codec DLL và decoded MP3 true peak; chưa dither."
+  },
+  {
+    "id": 41,
+    "name": "Xử lý hàng loạt",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M5",
+    "test": "stress 20×6s EQ→limiter→FLAC; export cancellation/error tests",
+    "result": "20 file xử lý thành công; UI batch có report từng file và tiếp tục sau lỗi.",
+    "missing": "Chưa end-to-end GUI batch 100 file/Windows hoặc resume sau restart."
+  },
+  {
+    "id": 42,
+    "name": "Tự phát hiện vấn đề",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M3",
+    "test": "test_issue_detection_positions",
+    "result": "Quét heuristic đánh dấu gần clipping, nhỏ, chói, nền phổ phẳng; thời gian fixture clipping đúng.",
+    "missing": "Chưa precision/recall với dataset bản thu thật; false positives có thể nhiều."
+  },
+  {
+    "id": 43,
+    "name": "Gợi ý xử lý",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M3",
+    "test": "test_gui_desktop preview; source issue_clicked + effect mapping",
+    "result": "Mỗi dấu hiệu có giải thích, vùng thời gian và preset/effect đề xuất; nghe thử trước áp dụng.",
+    "missing": "Chưa đánh giá hiệu quả đề xuất hoặc cá nhân hóa tham số theo nguồn."
+  },
+  {
+    "id": 44,
+    "name": "Preset theo mục đích",
+    "status": "Một phần / cần đánh giá thêm",
+    "phase": "M2/M4",
+    "test": "DSP chain tests; preset persistence implementation",
+    "result": "Vocal tự nhiên, bản thu cũ, bass, lời nói; lưu preset JSON. Karaoke dùng stem sẵn có.",
+    "missing": "Karaoke AI chưa chạy; preset riêng chưa có ca GUI lưu/mở riêng."
+  },
+  {
+    "id": 45,
+    "name": "Cường độ xử lý",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M2",
+    "test": "test_desktop_import_edit_preview_save_reopen_export; DSP parameter tests",
+    "result": "Wet/dry tổng trong preview/apply và tham số mức xử lý từng effect.",
+    "missing": "Đổi thời lượng cần 100%; thanh tổng không tác động rack/batch; nghe đánh giá nhẹ/mạnh còn thiếu."
+  },
+  {
+    "id": 46,
+    "name": "Lịch sử, tự lưu và phục hồi",
+    "status": "Cơ bản đã kiểm thử (Linux)",
+    "phase": "M1/M5",
+    "test": "test_recovery_after_process_abrupt_exit; test_failed_autosave_rolls_back_model; atomic-save tests",
+    "result": "Kill process exit 7 rồi recovery giữ vị trí; undo sau recovery; lỗi save giữ bản cũ và rollback model.",
+    "missing": "Chưa crash khi Windows đang ghi đĩa thật, lost power hoặc cache cleanup; giới hạn 100 snapshots."
+  },
+  {
+    "id": 47,
+    "name": "Plugin bên ngoài",
+    "status": "Bộ nối có mã, chưa nghiệm thu",
+    "phase": "M4/M5",
+    "test": "test_scan_vst_bundles_and_fault_isolation; test_ai_missing_and_plugin_invalid_file",
+    "result": "VST3 discovery, worker process, timeout/cancel, tham số/state và render có mã; lỗi binary không làm hỏng model.",
+    "missing": "Chưa VST3 hợp lệ thực, state recall thành công, plugin native crash trên Windows, latency compensation/GUI editor."
+  }
+]

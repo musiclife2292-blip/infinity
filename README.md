@@ -57,6 +57,12 @@ Linux cần PortAudio hệ thống để phát qua thiết bị; kiểm thử Qt
 - [Giới hạn và việc còn thiếu](docs/KNOWN_LIMITATIONS_VI.md)
 - [Thành phần bên thứ ba](THIRD_PARTY_NOTICES.md)
 
-Mở `evidence/Demo-acoustic.infinity` để xem timeline mẫu. Âm thanh demo và các cặp A/B được tạo tổng hợp bằng mã, không phải bản thu người thật hay minh chứng chất lượng tách stem.
+Chạy `python scripts/capture_ui.py` để tạo `evidence/Demo-acoustic.infinity` và ảnh giao diện; chạy `python scripts/validate_release.py evidence` để tạo các cặp A/B. Âm thanh demo được tạo tổng hợp bằng mã, không phải bản thu người thật hay minh chứng chất lượng tách stem. Các file audio lớn được tạo lại từ script, không lưu vào Git.
+
+## Pipeline Windows
+
+Repo dành riêng cho dự án: https://github.com/musiclife2292-blip/infinity
+
+Workflow chạy tests, tạo mẫu DSP, đóng gói PyInstaller + NSIS, rồi dùng một runner Windows khác để cài/chạy/gỡ bản alpha. Diagnostic `InfinityAudio.exe --self-test report.json` kiểm tra giao diện, xử lý, codec, dự án và khôi phục ngay trong binary đã đóng gói. Playback của diagnostic dùng buffer bộ nhớ; thiết bị âm thanh thật chưa được chứng minh bởi CI. Chỉ job cài đặt thành công mới tạo artifact `Infinity-audio-win64-alpha`.
 
 Mã ứng dụng trong gói được chuẩn bị theo **GPL-3.0-only** để phù hợp Pedalboard/JUCE. Chưa có trọng số AI, plugin bên thứ ba hoặc binary Windows trong gói. Xem thông báo bản quyền và cổng pháp lý trước khi phân phối.

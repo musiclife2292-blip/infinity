@@ -1,0 +1,88 @@
+name: Infinity audio Windows alpha
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+          cache: pip
+      - name: Install NSIS
+        shell: pwsh
+        run: choco install nsis --version=3.11 -y --no-progress
+      - name: Build tested alpha application and installer
+        shell: pwsh
+        run: ./scripts/build_windows.ps1 -Python python
+      - name: Save build evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: infinity-audio-build-evidence
+          path: |
+            evidence/windows-pytest.xml
+            evidence/windows-build/
+            third_party_licenses/inventory.json
+            build/InfinityAudio/warn-InfinityAudio.txt
+          if-no-files-found: warn
+      - name: Save installer candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: infinity-audio-installer-candidate
+          path: |
+            dist/*setup.exe
+            dist/*setup.exe.sha256
+          if-no-files-found: error
+  install:
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: infinity-audio-installer-candidate
+          path: dist
+      - name: Verify candidate hash
+        shell: pwsh
+        run: |
+          $expected = ((Get-Content dist/*setup.exe.sha256 -Raw).Trim() -split '\s+')[0]
+          $actual = (Get-FileHash dist/*setup.exe -Algorithm SHA256).Hash
+          if ($expected -ne $actual) { throw 'Installer checksum mismatch' }
+      - name: Install, exercise and uninstall on a separate runner
+        shell: pwsh
+        run: ./scripts/test_windows_install.ps1 -Installer ./dist/Infinity-audio-0.1.0-alpha.1-win64-setup.exe -RuntimeOnly
+      - name: Save installation evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: infinity-audio-install-evidence
+          path: |
+            evidence/windows-install-result.json
+            evidence/installed-selftest.json
+            evidence/installed-selftest.png
+          if-no-files-found: warn
+      - name: Save tested alpha installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Infinity-audio-win64-alpha
+          path: |
+            dist/*setup.exe
+            dist/*setup.exe.sha256
+            evidence/windows-install-result.json
+            evidence/installed-selftest.json
+            evidence/installed-selftest.png
+          if-no-files-found: error
+      # Hosted Server CI does not certify clean Windows 10/11 or physical audio.

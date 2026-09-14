@@ -1,0 +1,5 @@
+command: QT_QPA_PLATFORM=offscreen ./dist/InfinityAudio/InfinityAudio --smoke-test
+exit_code: 0
+platform: Linux-6.18.44-x86_64-with-glibc2.39
+sha256: 78dd89db65fd79597cc63d68005760ed47f7d5516522b73316883c826e6acd58
+bytes: 22565848

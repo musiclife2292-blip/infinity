@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+*.tmp
+*.bak
+workspaces/
+pytest-of-root/
+third_party_licenses/
+evidence/windows*/
+evidence/windows-*.xml
+evidence/windows-*.json
+evidence/windows-*.png

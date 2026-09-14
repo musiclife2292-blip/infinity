@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "infinity-audio"
+version = "0.1.0a1"
+description = "Infinity audio — trình biên tập âm thanh desktop tiếng Việt"
+requires-python = ">=3.12,<3.13"
+license = {text = "GPL-3.0-only"}
+dependencies = [
+  "numpy==2.2.4", "scipy==1.15.2", "PySide6==6.8.3",
+  "soundfile==0.13.1", "sounddevice==0.5.1", "librosa==0.11.0",
+  "pedalboard==0.9.17", "pyloudnorm==0.1.1"
+]
+
+[project.scripts]
+infinity-audio = "infinity_audio.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+infinity_audio = ["feature_status.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["gui: Qt offscreen integration", "slow: longer stress or pitch tests"]
