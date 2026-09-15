@@ -17,6 +17,8 @@ Trong lượt trước, nhận diện cao độ đã segfault khi dùng cache c�
 
 ## Cổng tiếp theo
 
+Run `34957225215` dừng ở kiểm thử bố cục: Windows báo ô nhập 31 px trong khi minimumSizeHint cần 34 px. Bản sửa tiếp theo đặt chiều cao tối thiểu theo font/button metrics sau khi tạo tham số và đổi theme; giữ nguyên điều kiện kiểm thử. 101 ca còn lại của run đó đạt.
+
 Chỉ dùng bộ cài của Actions run khớp commit này sau khi cả build và install đều thành công; đối chiếu SHA-256, xem `installed-selftest.json`, `installed-second-launch.json`, ảnh cửa sổ và `windows-install-result.json`. Cập nhật báo cáo, ma trận 47 yêu cầu và link tải sau khi có bằng chứng. Bộ cài của run trước không chứa sửa bố cục này.
 
 Chưa nghiệm thu đủ 47 tính năng, model AI/stem, Windows 10/11 sạch hoặc thiết bị âm thanh vật lý. Giữ nguyên Infinity-Studio; mọi thay đổi ở repo `musiclife2292-blip/infinity`.

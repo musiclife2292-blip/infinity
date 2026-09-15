@@ -204,6 +204,7 @@ class MainWindow(QMainWindow):
     def set_theme(self,light):
         self.light=light;self.settings.setValue("light",light)
         QApplication.instance().setStyleSheet(stylesheet(light))
+        self.size_parameter_fields()
         self.timeline.light=light;self.timeline.update()
 
     def selected(self):
@@ -521,6 +522,14 @@ class MainWindow(QMainWindow):
         for name,(title,default,lo,hi,step) in info["params"].items():
             widget=QDoubleSpinBox();widget.setRange(lo,hi);widget.setSingleStep(step);widget.setDecimals(3 if step<.1 else 2 if step<1 else 1);widget.setValue(default);widget.setToolTip(title+". "+info["hint"])
             self.param_form.addRow(title,widget);self.param_fields[name]=widget
+        self.size_parameter_fields()
+
+    def size_parameter_fields(self):
+        # The stylesheet minimum alone can be smaller than a Windows spin
+        # box's font/button metrics. Refresh after creation and theme changes.
+        for widget in getattr(self,"param_fields",{}).values():
+            widget.ensurePolished()
+            widget.setMinimumHeight(max(widget.minimumHeight(),widget.minimumSizeHint().height()))
 
     def effect(self):
         return {"kind":self.effect_combo.currentData(),"params":{k:w.value() for k,w in self.param_fields.items()}}
