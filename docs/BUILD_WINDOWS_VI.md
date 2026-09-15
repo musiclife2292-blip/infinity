@@ -24,7 +24,7 @@ Script tạo venv, cài dependency, chạy tests, kiểm kê license, tạo icon
 
 Không chỉ sao chép `InfinityAudio.exe` trong onedir: cần toàn bộ `_internal`. Bộ cài NSIS đã cấu hình mang theo cả thư mục. Nó cài vào `%LOCALAPPDATA%\Programs\InfinityAudio`, tạo shortcut Start Menu, ghi Apps & Features cho user hiện tại và tạo uninstaller; không đòi admin. Chưa đăng ký liên kết mặc định `.infinity`. Cần kiểm tra máy Windows sạch để phát hiện thiếu Qt DLL, libsndfile, PortAudio, runtime MSVC hoặc lazy import librosa.
 
-Các root dependency được pin. Các dependency bắc cầu chưa có lock Windows bằng hash đã nghiệm thu; `third_party_licenses/inventory.json` ghi tập thực tế trên Linux, không phải SBOM hoàn chỉnh Windows. Trước release cần pin toàn bộ tập build Windows và lưu SHA-256 của artifacts.
+Các root dependency được pin. Các dependency bắc cầu chưa có lock Windows bằng hash đã nghiệm thu; mỗi artifact build chứa `third_party_licenses/inventory.json` và `evidence/windows-build/dependencies.txt` của chính máy build đó. Đây chưa phải SBOM hoàn chỉnh Windows. Trước release cần pin toàn bộ tập build Windows; workflow hiện đã lưu SHA-256 của installer và artifacts.
 
 PyInstaller không là cross-compiler. Không đổi đuôi một file Linux thành `.exe`. Bản Qt offscreen trên Linux chỉ chứng minh logic/UI có thể chạy trong môi trường đó.
 
@@ -54,6 +54,6 @@ Model dự kiến `htdemucs`: drums, bass, other, vocals. `htdemucs_6s`: thêm g
 
 ## Giấy phép, ký số và phát hành
 
-NSIS dùng zlib compression trong script để dùng phần nén zlib. Source chuẩn bị GPL-3.0-only do Pedalboard/JUCE. `collect_licenses.py` sao chép notice đi cùng các package tìm được; PySide/Shiboken wheels hiện thiếu file notice trong metadata đã đọc nên đây còn là việc chặn release. Cần gom license/module notices Qt, nguồn tương ứng GPL, codec và DLL cụ thể trên Windows. Không có binary/plugin/model bên thứ ba ngoài tập cài đặt dependency nguồn trong gói này.
+NSIS dùng zlib compression trong script để dùng phần nén zlib. Source chuẩn bị GPL-3.0-only do Pedalboard/JUCE. `collect_licenses.py` sao chép notice đi cùng các package tìm được, gồm CPython và notice Qt/Shiboken bổ sung. Inventory build run `34910577626` có 35 mục, không có mục thiếu notice; đây không thay thế rà soát đầy đủ nguồn tương ứng GPL, license/module Qt, codec và DLL cụ thể trên Windows. Fixture plugin chỉ nằm trên máy kiểm thử, không được đưa vào bộ cài; model AI chưa được phân phối.
 
 Chưa có chứng thư ký số, chưa sign hoặc timestamp executable/installer, chưa đo hành vi SmartScreen/antivirus. Sau build và xử lý mọi lỗi P0/P1, dùng chứng thư của nhà phát hành để ký exe và installer; không ghi private key/password vào repository. Chỉ đánh dấu release sau khi các mục trong `WINDOWS_ACCEPTANCE_VI.md` và đủ 47 yêu cầu đạt bằng chứng.

@@ -152,9 +152,17 @@ def run(app, report_path):
                 check("vst3_discovery", fixture in discovered,
                       discovered_plugins=[str(value) for value in sorted(discovered)])
                 info = plugins.run_plugin(fixture, timeout=45)
-                check("vst3_load", "output_gain" in info["parameters"] and bool(info["state"]))
+                # The pinned Windows fixture labels this parameter "Output
+                # Gain [dB]", while the Linux fixture uses "Output Gain".
+                # Keep the actual host key for editing and project recall.
+                gain_keys = [key for key in ("output_gain", "output_gain_db")
+                             if key in info["parameters"]]
+                check("vst3_load", len(gain_keys) == 1 and bool(info["state"]),
+                      parameter_names=sorted(info["parameters"]),
+                      state_bytes_base64=len(info["state"]))
+                gain_key = gain_keys[0]
                 params = {k: False for k in info["parameters"] if k.endswith("on_off")}
-                params["output_gain"] = -9.0
+                params[gain_key] = -9.0
                 plugin_input = np.repeat(audio, 2, axis=1)
                 in_path, out_path = base / "plugin-input.npy", base / "plugin-output.npy"
                 np.save(in_path, plugin_input, allow_pickle=False)
@@ -176,11 +184,12 @@ def run(app, report_path):
                 from .dialogs import PluginDialog
                 saved_params=dict(state["parameters"])
                 dialog=PluginDialog(previous=state)
-                edited_params=dict(saved_params,output_gain=-12.0)
+                edited_params=dict(saved_params)
+                edited_params[gain_key]=-12.0
                 dialog.params.setPlainText(json.dumps(edited_params))
                 dialog.apply()
                 check("vst3_dialog_preserves_project", state["parameters"]==saved_params and
-                      dialog.info["parameters"]["output_gain"]==-12.0)
+                      dialog.info["parameters"][gain_key]==-12.0)
                 dialog.close()
                 recall_path = base / "plugin-recalled.npy"
                 recalled_info = plugins.run_plugin(fixture, params=state["parameters"], state=state["state"],
@@ -190,10 +199,11 @@ def run(app, report_path):
                 # state restores parameters, not the transient delay buffers.
                 steady_error = float(np.max(np.abs(effected[sr:] - recalled_audio[sr:])))
                 check("vst3_state_and_parameters_recall", steady_error < 1e-5 and
-                      abs(recalled_info["parameters"]["output_gain"] + 9) < .01,
+                      abs(recalled_info["parameters"][gain_key] + 9) < .01,
                       steady_state_max_error=steady_error,
-                      recalled_gain=recalled_info["parameters"]["output_gain"])
+                      recalled_gain=recalled_info["parameters"][gain_key])
                 result["vst3_fixture"] = {"path": str(fixture), "name": "CHOWTapeModel",
+                    "gain_parameter": gain_key,
                     "state_bytes_base64": len(info["state"]),
                     "sha256": hashlib.sha256(fixture.read_bytes()).hexdigest() if fixture.is_file() else None}
             check("source_unchanged", original_hash == hashlib.sha256(source.read_bytes()).hexdigest())

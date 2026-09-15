@@ -34,6 +34,10 @@ Assert-Exit "license inventory"
 Assert-Exit "icon"
 & $venvPython scripts/validate_release.py evidence/windows-build
 Assert-Exit "DSP, codecs and bounded stress"
+if ($env:INFINITY_TEST_VST3) {
+    & $venvPython launch.py --self-test evidence/windows-build/source-selftest.json
+    Assert-Exit "source diagnostic with real VST3"
+}
 & $venvPython -m PyInstaller --noconfirm --clean packaging/InfinityAudio.spec
 Assert-Exit "PyInstaller"
 $smoke = Start-Process -FilePath ".\dist\InfinityAudio\InfinityAudio.exe" -ArgumentList "--smoke-test" -PassThru
