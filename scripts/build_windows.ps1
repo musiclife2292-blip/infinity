@@ -26,6 +26,7 @@ Assert-Exit "editable source"
 & $venvPython -m pip freeze --all | Set-Content "evidence\windows-build\dependencies.txt" -Encoding utf8
 Assert-Exit "dependency snapshot"
 $env:QT_QPA_PLATFORM = "offscreen"
+$env:NUMBA_CACHE_DIR = Join-Path $root "build\numba-source"
 & $venvPython -m pytest -q --junitxml=evidence/windows-pytest.xml
 Assert-Exit "tests"
 & $venvPython scripts/collect_licenses.py
@@ -40,6 +41,9 @@ if ($env:INFINITY_TEST_VST3) {
 }
 & $venvPython -m PyInstaller --noconfirm --clean packaging/InfinityAudio.spec
 Assert-Exit "PyInstaller"
+$jitCaches = Get-ChildItem "dist\InfinityAudio" -Recurse -File | Where-Object { $_.Extension -in @(".nbc", ".nbi") }
+if ($jitCaches) { throw "Build-machine Numba cache leaked into the application bundle." }
+$env:NUMBA_CACHE_DIR = Join-Path $root "build\numba-frozen"
 $smoke = Start-Process -FilePath ".\dist\InfinityAudio\InfinityAudio.exe" -ArgumentList "--smoke-test" -PassThru
 if (-not $smoke.WaitForExit(45000)) { $smoke.Kill(); throw "Frozen Qt smoke timeout" }
 if ($smoke.ExitCode -ne 0) { throw "Frozen Qt smoke exit code $($smoke.ExitCode)" }

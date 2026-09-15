@@ -29,6 +29,7 @@ $result = [ordered]@{
     installer_sha256 = (Get-FileHash $installerPath -Algorithm SHA256).Hash
     installed = $false; launched = $false; uninstalled = $false
     frozen_diagnostic_passed = $false
+    second_launch_diagnostic_passed = $false
     developer_tools_removed_from_path = [bool]$RuntimeOnly
     native_qt_platform = "windows"
     clean_machine_confirmed = $false
@@ -51,6 +52,12 @@ try {
     if ($p.ExitCode -ne 0 -or -not (Test-Path $selfTestReport)) { throw "Installed app diagnostic failed, code $($p.ExitCode)" }
     $result.frozen_diagnostic_passed = (Get-Content $selfTestReport -Raw | ConvertFrom-Json).passed
     if (-not $result.frozen_diagnostic_passed) { throw "Installed application diagnostic did not pass." }
+    $secondReport = Join-Path (Split-Path -Parent $reportPath) "installed-second-launch.json"
+    $p = Start-Process -FilePath $exe -ArgumentList @("--self-test", "`"$secondReport`"") -PassThru
+    if (-not $p.WaitForExit(240000)) { $p.Kill(); throw "Second launch diagnostic timeout" }
+    if ($p.ExitCode -ne 0 -or -not (Test-Path $secondReport)) { throw "Second launch diagnostic failed, code $($p.ExitCode)" }
+    $result.second_launch_diagnostic_passed = (Get-Content $secondReport -Raw | ConvertFrom-Json).passed
+    if (-not $result.second_launch_diagnostic_passed) { throw "Second launch diagnostic did not pass." }
     # A user's document in the install directory must survive uninstall.
     $userDocument = Join-Path $testDir "user-project.txt"
     [IO.File]::WriteAllText($userDocument, "preserve this user document")

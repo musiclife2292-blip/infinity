@@ -127,6 +127,13 @@ def run(app, report_path):
             shifted = dsp.apply_effect(audio, sr, {"kind": "pitch", "params": {"semitones": 12}})
             peak_hz = np.argmax(np.abs(np.fft.rfft(shifted[2000:-2000, 0]))) * sr / (len(shifted) - 4000)
             check("frozen_librosa_pitch", shifted.shape == audio.shape and abs(peak_hz - 880) < 5, peak_hz=float(peak_hz))
+            detuned=(.2*np.sin(2*np.pi*452*np.arange(sr*2)/sr))[:,None].astype(np.float32)
+            corrected=dsp.apply_effect(detuned,sr,{"kind":"autotune","params":{"amount":100,"tolerance":0}})
+            stable=corrected[sr//2:,0]
+            corrected_hz=float(np.argmax(np.abs(np.fft.rfft(stable*np.hanning(len(stable)))))*sr/len(stable))
+            check("frozen_monophonic_pitch", corrected.shape==detuned.shape and
+                  np.isfinite(corrected).all() and abs(corrected_hz-440)<3,
+                  input_hz=452,output_hz=corrected_hz)
             meter = dsp.meters(mixed, sr)
             check("frozen_loudness", bool(meter) and all(np.isfinite(v) for v in meter.values() if isinstance(v, (float, int))), values=meter)
             steps=np.concatenate([np.full(sr,.001),np.full(sr,.2),np.full(sr,.001)])[:,None].astype(np.float32)
@@ -215,6 +222,26 @@ def run(app, report_path):
             window.set_theme(False)
             app.processEvents()
             check("dark_theme", not window.timeline.light)
+            window.resize(1180,760)
+            parameter_layouts=[]
+            for effect in ("eq","expander","spectral","compressor"):
+                window.effect_combo.setCurrentIndex(window.effect_combo.findData(effect))
+                app.processEvents()
+                visible=True
+                for field in window.param_fields.values():
+                    window.effect_scroll.ensureWidgetVisible(field,0,0)
+                    app.processEvents()
+                    center=field.mapTo(window.effect_scroll.viewport(),field.rect().center())
+                    visible=visible and field.height()>=field.minimumSizeHint().height() and \
+                        window.param_widget.rect().contains(field.geometry()) and \
+                        window.effect_scroll.viewport().rect().contains(center)
+                parameter_layouts.append({"effect":effect,"accessible":bool(visible),"fields":len(window.param_fields)})
+            check("effect_controls_accessible", all(x["accessible"] for x in parameter_layouts),
+                  layouts=parameter_layouts,window_size=[window.width(),window.height()])
+            window.effect_combo.setCurrentIndex(window.effect_combo.findData("eq"))
+            app.processEvents()
+            window.effect_scroll.verticalScrollBar().setValue(0)
+            app.processEvents()
             image = window.grab()
             check("ui_screenshot", image.save(str(report_path.with_suffix(".png"))))
             try:

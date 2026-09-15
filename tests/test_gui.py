@@ -49,6 +49,30 @@ def settle(qapp,window,timeout=30):
     assert not window.jobs.busy,"Background job failed to finish in time"
 
 
+def test_effect_parameters_remain_readable_and_reachable_at_minimum_window(qapp,tmp_path):
+    w=MainWindow(tmp_path/"layout",recover=False)
+    w.confirm_discard=lambda:True
+    try:
+        w.resize(1180,760);w.show();qapp.processEvents()
+        for light in (False,True):
+            w.set_theme(light)
+            for effect in ("eq","expander","spectral","compressor"):
+                w.effect_combo.setCurrentIndex(w.effect_combo.findData(effect));qapp.processEvents()
+                for field in w.param_fields.values():
+                    assert field.height()>=field.minimumSizeHint().height()
+                    assert w.param_widget.rect().contains(field.geometry())
+                    label=w.param_form.labelForField(field)
+                    assert label.height()>=label.minimumSizeHint().height()
+                    assert not label.geometry().intersects(field.geometry())
+                    w.effect_scroll.ensureWidgetVisible(field,0,0);qapp.processEvents()
+                    center=field.mapTo(w.effect_scroll.viewport(),field.rect().center())
+                    assert w.effect_scroll.viewport().rect().contains(center)
+                field=next(iter(w.param_fields.values()));field.setValue(field.minimum())
+                assert next(iter(w.effect()["params"].values()))==field.minimum()
+    finally:
+        w.close();qapp.processEvents()
+
+
 def test_desktop_import_edit_preview_save_reopen_export(qapp,tmp_path,tone,sr):
     w=MainWindow(tmp_path/"app",recover=False);errors=[];w.show_error=lambda e:errors.append(e)
     w.jobs.failed.disconnect();w.jobs.failed.connect(w.show_error)

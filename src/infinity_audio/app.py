@@ -14,7 +14,7 @@ from PySide6.QtGui import QAction,QKeySequence,QFont,QColor
 from PySide6.QtWidgets import (QApplication,QMainWindow,QWidget,QVBoxLayout,QHBoxLayout,QFormLayout,
     QFrame,QLabel,QPushButton,QSplitter,QScrollArea,QComboBox,QDoubleSpinBox,QSpinBox,
     QSlider,QListWidget,QTabWidget,QCheckBox,QProgressBar,QFileDialog,QMessageBox,QInputDialog,
-    QDialog,QDialogButtonBox,QPlainTextEdit)
+    QDialog,QDialogButtonBox,QPlainTextEdit,QLayout)
 
 from . import __version__,dsp,render,plugins,ai
 from .model import Session,track,clip,ident,atomic_json,recovery_candidates
@@ -86,7 +86,7 @@ class MainWindow(QMainWindow):
         root=QWidget();layout=QVBoxLayout(root);layout.setContentsMargins(18,12,18,8);layout.setSpacing(12)
         header=QHBoxLayout();header.setSpacing(12)
         header.addWidget(self.label("∞","Infinity"));header.addWidget(self.label("Infinity audio","Brand"))
-        header.addWidget(self.label("STUDIO · ALPHA 0.1","Pill"));header.addStretch()
+        header.addWidget(self.label(f"STUDIO · {__version__}","Pill"));header.addStretch()
         self.project_title=self.label("Dự án chưa đặt tên","Muted");header.addWidget(self.project_title)
         header.addWidget(self.button("◐  Giao diện",lambda:self.set_theme(not self.light),tip="Chuyển giao diện sáng/tối"))
         self.export_btn=self.button("Xuất âm thanh  ↗",self.export_dialog,"Primary");header.addWidget(self.export_btn)
@@ -148,6 +148,7 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(center)
         # Effect panel.
         right=QFrame();right.setObjectName("Panel");ev=QVBoxLayout(right);ev.setContentsMargins(14,15,14,12);ev.setSpacing(10)
+        ev.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
         ev.addWidget(self.label("XỬ LÝ ÂM THANH","Eyebrow"));self.selected_label=self.label("Chọn một clip","Title");self.selected_label.setWordWrap(True);ev.addWidget(self.selected_label)
         self.preset_combo=QComboBox();self.preset_combo.addItem("Chọn preset…");self.preset_combo.addItems(list(self.presets));self.preset_combo.currentTextChanged.connect(self.preset_changed);ev.addWidget(self.preset_combo)
         self.effect_combo=QComboBox()
@@ -155,6 +156,8 @@ class MainWindow(QMainWindow):
         self.effect_combo.currentIndexChanged.connect(self.rebuild_params);ev.addWidget(self.effect_combo)
         self.effect_hint=self.label("","Muted");self.effect_hint.setWordWrap(True);ev.addWidget(self.effect_hint)
         self.param_widget=QWidget();self.param_form=QFormLayout(self.param_widget);self.param_form.setContentsMargins(0,2,0,2);self.param_form.setSpacing(10)
+        self.param_form.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
+        self.param_form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapLongRows)
         ev.addWidget(self.param_widget)
         self.strength_label=self.label("Cường độ tổng: 100%","Muted");ev.addWidget(self.strength_label)
         self.strength=QSlider(Qt.Orientation.Horizontal);self.strength.setRange(0,100);self.strength.setValue(100);self.strength.valueChanged.connect(lambda v:self.strength_label.setText(f"Cường độ tổng: {v}%"));ev.addWidget(self.strength)
@@ -166,8 +169,13 @@ class MainWindow(QMainWindow):
         ev.addWidget(self.label("CHUỖI HIỆU ỨNG TRACK","Eyebrow"));self.rack=QListWidget();self.rack.setMaximumHeight(120);ev.addWidget(self.rack)
         rackrow=QHBoxLayout();rackrow.addWidget(self.button("↑",lambda:self.move_effect(-1)));rackrow.addWidget(self.button("↓",lambda:self.move_effect(1)));rackrow.addWidget(self.button("Xóa FX",self.remove_effect));ev.addLayout(rackrow)
         ev.addStretch();ev.addWidget(self.button("Automation / VST3…",self.advanced_menu))
-        self.quality_note=self.label("Bản kỹ thuật: phục hồi là ước lượng. AI và nghiệm thu Windows còn thiếu; xem Trợ giúp.","Muted");self.quality_note.setWordWrap(True);ev.addWidget(self.quality_note)
-        self.splitter.addWidget(right)
+        self.quality_note=self.label("Bản alpha · AI chưa khả dụng. Xem Trợ giúp để biết giới hạn xử lý.","Muted");self.quality_note.setWordWrap(True);ev.addWidget(self.quality_note)
+        # Scroll the inspector rather than squeezing parameter rows into the
+        # available window height. All fields remain reachable on small screens.
+        self.effect_scroll=QScrollArea();self.effect_scroll.setWidget(right);self.effect_scroll.setWidgetResizable(True)
+        self.effect_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.effect_scroll.setMinimumWidth(310)
+        self.splitter.addWidget(self.effect_scroll)
         self.splitter.setSizes([220,940,320]);self.splitter.setCollapsible(0,True);self.splitter.setCollapsible(1,False);self.splitter.setCollapsible(2,True)
         left.setMinimumWidth(185);right.setMinimumWidth(285)
         layout.addWidget(self.splitter,1)

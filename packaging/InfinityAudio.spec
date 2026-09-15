@@ -28,6 +28,9 @@ a = Analysis([str(root / "launch.py")], pathex=[str(root / "src")], binaries=bin
              datas=datas, hiddenimports=hiddenimports,
              excludes=["torch", "demucs", "tkinter", "PyQt5", "PyQt6", "matplotlib", "IPython"],
              noarchive=False)
+# JIT caches are generated for one compiler/process/CPU environment. They
+# must not travel from the build environment into the installed application.
+a.datas = [entry for entry in a.datas if not entry[0].lower().endswith((".nbc", ".nbi"))]
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="InfinityAudio",
           debug=False, bootloader_ignore_signals=False, strip=False, upx=False,

@@ -91,6 +91,8 @@ jobs:
             evidence/windows-install-result.json
             evidence/installed-selftest.json
             evidence/installed-selftest.png
+            evidence/installed-second-launch.json
+            evidence/installed-second-launch.png
           if-no-files-found: warn
       - name: Save tested alpha installer
         uses: actions/upload-artifact@v4
@@ -102,5 +104,7 @@ jobs:
             evidence/windows-install-result.json
             evidence/installed-selftest.json
             evidence/installed-selftest.png
+            evidence/installed-second-launch.json
+            evidence/installed-second-launch.png
           if-no-files-found: error
       # Hosted Server CI does not certify clean Windows 10/11 or physical audio.
